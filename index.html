@@ -9,88 +9,21 @@
     
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             background-color: #f9f9f9;
-            color: #333;
             max-width: 450px;
             margin: 60px auto;
             padding: 20px;
         }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-        .input-felt {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-        input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            outline: none;
-        }
-        input:focus {
-            border-color: #3498db;
-        }
-        button {
-            padding: 12px 20px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        li {
-            padding: 14px;
-            background: white;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        li:active {
-            transform: scale(0.98);
-        }
-        .todo-tekst {
-            flex: 1;
-            font-size: 16px;
-        }
-        .completed .todo-tekst {
-            text-decoration: line-through;
-            color: #bbb;
-        }
-        .slet-knap {
-            background: none;
-            color: #e74c3c;
-            border: none;
-            padding: 5px 10px;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .slet-knap:hover {
-            background-color: #fdedec;
-        }
+        h1 { text-align: center; color: #2c3e50; }
+        .input-felt { display: flex; gap: 10px; margin-bottom: 25px; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        button { padding: 12px 20px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #2980b9; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 14px; background: white; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; }
+        .completed .todo-tekst { text-decoration: line-through; color: #bbb; }
+        .slet-knap { background: none; color: #e74c3c; border: none; font-size: 18px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -105,14 +38,12 @@
     <ul id="todoListe"></ul>
 
     <script>
-        // Dine personlige Supabase login-oplysninger sat direkte ind:
-       const supabaseUrl = 'https://fmcloudylxigejbfqktl.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtY2x1YWR5bHhpZ2VqYmZxa3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMTQ3NDYsImV4cCI6MjA5NTU5MDc0Nn0.CetSfkZhVqYZVDzCu5U3dioBnl9qSZr7VBgn-kw3bzA';
+        // Dine præcise Supabase oplysninger
+        const supabaseUrl = 'https://fmcloudylxigejbfqktl.supabase.co'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtY2x1YWR5bHhpZ2VqYmZxa3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMTQ3NDYsImV4cCI6MjA5NTU5MDc0Nn0.CetSfkZhVqYZVDzCu5U3dioBnl9qSZr7VBgn-kw3bzA'; 
         
-        // Forbind til Supabase
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Hent automatisk listen når siden åbnes
         window.onload = hentTodos;
 
         // 1. HENT OPAGVER
@@ -134,18 +65,16 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
                 const li = document.createElement('li');
                 if (todo.completed) li.classList.add('completed');
 
-                // Opret tekst-elementet (klik på dette for at strege ud)
                 const tekstSpan = document.createElement('span');
-                tekstSpan.classList.add('todo-tekst');
+                tekstSpan.className = 'todo-tekst';
                 tekstSpan.textContent = todo.text;
                 tekstSpan.onclick = () => toggleTodo(todo.id, todo.completed);
 
-                // Opret slet-knap (X)
                 const sletKnap = document.createElement('button');
-                sletKnap.classList.add('slet-knap');
+                sletKnap.className = 'slet-knap';
                 sletKnap.innerHTML = '&times;';
                 sletKnap.onclick = (e) => {
-                    e.stopPropagation(); // Stopper klikket fra også at trykke på selve opgaven
+                    e.stopPropagation();
                     sletTodo(todo.id);
                 };
 
@@ -167,39 +96,29 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
                 .insert([ { text: tekst } ]); 
 
             if (error) {
-                alert('Kunne ikke gemme: ' + error.message);
+                alert('Fejl: ' + error.message);
             } else {
                 input.value = ''; 
-                hentTodos(); // Opdater listen med det samme
+                hentTodos(); 
             }
         }
 
-        // 3. MARKER SOM UDFØRT / IKKE UDFØRT
+        // 3. STREG UD / FORMINDST
         async function toggleTodo(id, nuvaerendeStatus) {
-            const { error } = await supabase
+            await supabase
                 .from('todos')
                 .update({ completed: !nuvaerendeStatus })
                 .eq('id', id);
-
-            if (error) {
-                console.error('Kunne ikke opdatere:', error);
-            } else {
-                hentTodos(); 
-            }
+            hentTodos(); 
         }
 
         // 4. SLET OPGAVE
         async function sletTodo(id) {
-            const { error } = await supabase
+            await supabase
                 .from('todos')
                 .delete()
                 .eq('id', id);
-
-            if (error) {
-                console.error('Kunne ikke slette:', error);
-            } else {
-                hentTodos(); 
-            }
+            hentTodos(); 
         }
     </script>
 </body>
