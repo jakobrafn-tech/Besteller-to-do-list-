@@ -5,65 +5,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BESTSELLER Task Board</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --bg:       #f3f2ee;
-  --surface:  #ffffff;
-  --surface2: #f7f6f2;
-  --surface3: #edece7;
-  --border:   rgba(0,0,0,.08);
-  --border2:  rgba(0,0,0,.14);
-  --txt:      #1a1a18;
-  --txt2:     #6b6a65;
-  --txt3:     #a09e98;
-  --accent:   #0F6E56;
-  --accent-h: #085041;
-  --accent-lt:#E1F5EE;
-  --r:        8px;
-  --rlg:      12px;
-  --font:     'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
-  --mono:     'SF Mono','Fira Code',monospace;
-  --c-todo:   #9b9a95;
-  --c-ready:  #e07d2a;
-  --c-prog:   #3b82f6;
-  --c-done:   #22c55e;
+  --bg:#f3f2ee;--surface:#ffffff;--surface2:#f7f6f2;--surface3:#edece7;
+  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.14);
+  --txt:#1a1a18;--txt2:#6b6a65;--txt3:#a09e98;
+  --accent:#0F6E56;--accent-h:#085041;--accent-lt:#E1F5EE;
+  --r:8px;--rlg:12px;
+  --font:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'SF Mono','Fira Code',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{font-size:14px}
 body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh}
 input,select,button,textarea{font-family:var(--font)}
 button{cursor:pointer}
 
-/* ── NAV ── */
+/* NAV */
 .nav{position:sticky;top:0;z-index:90;height:50px;display:flex;align-items:center;gap:10px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border)}
 .nav-logo{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}
 .nav-div{width:1px;height:16px;background:var(--border2);margin:0 2px}
 .nav-space{font-size:13px;color:var(--txt2)}
-.nav-right{margin-left:auto}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.save-indicator{font-size:12px;color:var(--txt3);display:flex;align-items:center;gap:5px;transition:opacity .3s}
+.save-indicator.saving{color:var(--accent)}
+.save-indicator.error{color:#dc2626}
 .avatar{width:28px;height:28px;border-radius:50%;background:#1D9E75;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
 
-/* ── BODY ── */
+/* BODY */
 .app{padding:22px 24px;max-width:1320px;margin:0 auto}
 
-/* ── TOOLBAR ── */
+/* TOOLBAR */
 .toolbar{display:flex;align-items:center;gap:7px;margin-bottom:14px;flex-wrap:wrap}
-.tb-title{font-size:15px;font-weight:700;color:var(--txt);margin-right:2px;display:flex;align-items:center;gap:6px}
+.tb-title{font-size:15px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:6px}
 .search-wrap{position:relative;flex:1;min-width:130px;max-width:220px}
 .search-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--txt3);pointer-events:none}
-.search-wrap input{width:100%;padding:7px 8px 7px 30px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt);transition:border-color .15s}
+.search-wrap input{width:100%;padding:7px 8px 7px 30px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt)}
 .search-wrap input:focus{outline:none;border-color:var(--accent)}
-.tb-sel{padding:7px 10px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt2);transition:border-color .15s}
+.tb-sel{padding:7px 10px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt2)}
 .tb-sel:focus{outline:none;border-color:var(--accent)}
 .date-filters{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .df-btn{padding:6px 11px;font-size:12px;font-weight:500;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--txt2);transition:all .15s;display:flex;align-items:center;gap:4px}
 .df-btn:hover{background:var(--surface3);border-color:var(--txt3)}
 .df-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn-out{padding:7px 12px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt2);display:flex;align-items:center;gap:5px;transition:all .15s}
-.btn-out:hover{background:var(--surface2);border-color:var(--txt3);color:var(--txt)}
+.btn-out:hover{background:var(--surface2);color:var(--txt)}
 .btn-new{padding:7px 16px;font-size:13px;font-weight:700;border-radius:var(--r);border:none;background:var(--accent);color:#fff;display:flex;align-items:center;gap:5px;margin-left:auto;transition:background .15s}
 .btn-new:hover{background:var(--accent-h)}
 
-/* ── STATS ── */
+/* STATS */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:13px 16px;display:flex;align-items:center;gap:11px}
 .stat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
@@ -71,20 +61,19 @@ button{cursor:pointer}
 .stat-n{font-size:22px;font-weight:800;line-height:1}
 .stat-red{font-size:22px;font-weight:800;color:#dc2626;line-height:1}
 
-/* ── TABLE ── */
+/* TABLE */
 .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden}
 .t-head{display:grid;grid-template-columns:20px minmax(0,2.8fr) 120px 170px 100px 110px 88px;background:var(--surface2);border-bottom:1px solid var(--border);padding:0 16px}
 .th{font-size:11px;font-weight:600;color:var(--txt3);padding:10px 8px;display:flex;align-items:center;gap:4px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
 
-/* ── SECTION ── */
+/* SECTION */
 .sec-hdr{display:flex;align-items:center;gap:9px;padding:8px 16px;background:var(--surface2);border-bottom:1px solid var(--border);user-select:none;transition:background .1s}
 .sec-hdr:hover{background:var(--surface3);cursor:pointer}
 .sec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .sec-lbl{font-size:13px;font-weight:700;color:var(--txt);flex:1}
 .sec-cnt{font-size:11px;color:var(--txt3);background:var(--surface);border-radius:20px;padding:1px 8px;border:1px solid var(--border)}
-.chev{font-size:12px;color:var(--txt3);margin-left:auto}
 
-/* ── TASK ROW ── */
+/* TASK ROW */
 .task-row{display:grid;grid-template-columns:20px minmax(0,2.8fr) 120px 170px 100px 110px 88px;padding:0 16px;border-bottom:1px solid var(--border);transition:background .1s}
 .task-row:hover{background:var(--surface2)}
 .td{padding:11px 8px;display:flex;align-items:center;gap:6px;overflow:hidden;font-size:13px}
@@ -93,7 +82,7 @@ button{cursor:pointer}
 .task-name{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-weight:500;transition:color .15s}
 .task-name:hover{color:var(--accent)}
 
-/* ── INLINE CELLS ── */
+/* INLINE CELLS */
 .ic{cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px 7px;border-radius:6px;transition:background .12s;min-width:0;max-width:100%}
 .ic:hover{background:var(--surface3)}
 .brand-pill{font-size:11.5px;border-radius:20px;padding:3px 10px;font-weight:700;white-space:nowrap;flex-shrink:0}
@@ -103,23 +92,23 @@ button{cursor:pointer}
 .date-cell.overdue{color:#dc2626;font-weight:600}
 .date-cell.today{color:#d97706;font-weight:600}
 .date-cell.soon{color:#2563eb}
-.date-cell.future{color:var(--txt2)}
+.date-cell.future,.date-cell.active{color:var(--txt2)}
 .date-cell.empty{color:var(--txt3)}
 
 .add-row{display:flex;align-items:center;gap:7px;padding:9px 22px;color:var(--txt3);font-size:12.5px;transition:color .1s,background .1s}
 .add-row:hover{color:var(--txt);background:var(--surface2);cursor:pointer}
 
-/* ── POPUP DROPDOWN ── */
+/* POPUP */
 .popup{position:fixed;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rlg);box-shadow:0 8px 28px rgba(0,0,0,.13);z-index:500;min-width:170px;overflow:hidden;display:none;padding:4px}
 .popup.open{display:block}
 .pop-item{padding:8px 12px;font-size:13px;border-radius:var(--r);display:flex;align-items:center;gap:8px;color:var(--txt);transition:background .1s;white-space:nowrap}
 .pop-item:hover{background:var(--surface2);cursor:pointer}
 .pop-item.active{background:var(--accent-lt);color:var(--accent);font-weight:700}
 
-/* ── TASK MODAL ── */
+/* MODAL */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:200;align-items:flex-start;justify-content:center;padding:28px 16px 40px;overflow-y:auto}
 .overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:var(--rlg);border:1px solid var(--border2);width:860px;max-width:100%;box-shadow:0 20px 70px rgba(0,0,0,.18);margin:auto;cursor:default}
+.modal{background:var(--surface);border-radius:var(--rlg);border:1px solid var(--border2);width:860px;max-width:100%;box-shadow:0 20px 70px rgba(0,0,0,.18);margin:auto}
 .modal-topbar{display:flex;align-items:center;gap:8px;padding:11px 18px;border-bottom:1px solid var(--border);background:var(--surface2);border-radius:var(--rlg) var(--rlg) 0 0}
 .type-badge{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);font-size:11px;color:var(--txt2);font-weight:500}
 .m-sid{font-size:11px;color:var(--txt3);font-family:var(--mono)}
@@ -127,14 +116,13 @@ button{cursor:pointer}
 .ai-btn:hover{background:#CECBF6}
 .close-x{margin-left:auto;background:none;border:none;color:var(--txt2);font-size:18px;padding:4px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .1s}
 .close-x:hover{color:var(--txt);background:var(--surface3)}
-
 .modal-body{padding:26px 28px 20px}
 .m-title{width:100%;font-size:24px;font-weight:800;color:var(--txt);border:none;background:transparent;outline:none;margin-bottom:22px;padding-bottom:10px;border-bottom:2px solid transparent;transition:border-color .2s;line-height:1.3}
 .m-title:focus{border-bottom-color:var(--accent)}
 .m-title::placeholder{color:var(--txt3)}
 
-/* Props grid */
-.props{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:24px}
+/* Props */
+.props{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:24px;transition:border-color .3s}
 .prop{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .1s}
 .prop:nth-last-child(-n+2){border-bottom:none}
 .prop.l{border-right:1px solid var(--border)}
@@ -145,10 +133,8 @@ button{cursor:pointer}
 .p-sel{width:100%;font-size:13px;color:var(--txt);border:none;background:transparent;outline:none;padding:0;cursor:pointer}
 .p-inp{width:100%;font-size:13px;color:var(--txt);border:none;background:transparent;outline:none;padding:0;cursor:pointer}
 .p-inp::placeholder{color:var(--txt3)}
-.status-accent{transition:background .3s;border-radius:var(--rlg) var(--rlg) 0 0}
 
 /* Editor */
-.editor-section{}
 .editor-lbl{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px}
 .editor-wrap{border:1px solid var(--border2);border-radius:var(--rlg);overflow:hidden}
 .ed-toolbar{display:flex;align-items:center;gap:1px;padding:6px 9px;background:var(--surface2);border-bottom:1px solid var(--border);flex-wrap:wrap}
@@ -174,7 +160,7 @@ button{cursor:pointer}
 .drop-zone i{font-size:20px;display:block;margin-bottom:4px}
 .drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:var(--accent-lt);color:var(--accent)}
 
-/* Modal footer */
+/* Footer */
 .modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:14px 24px;border-top:1px solid var(--border);background:var(--surface2);border-radius:0 0 var(--rlg) var(--rlg)}
 .btn-del{padding:8px 14px;font-size:13px;border-radius:var(--r);border:none;background:#FEE2E2;color:#dc2626;font-weight:600;margin-right:auto;display:none;transition:background .15s}
 .btn-del:hover{background:#FECACA}
@@ -183,25 +169,28 @@ button{cursor:pointer}
 .btn-save{padding:8px 22px;font-size:13px;font-weight:700;border-radius:var(--r);border:none;background:var(--accent);color:#fff;transition:background .15s}
 .btn-save:hover{background:var(--accent-h)}
 
+/* Loading */
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:999}
+.loading-screen.hidden{display:none}
+.spinner{width:28px;height:28px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 /* Lightbox */
 .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:900;align-items:center;justify-content:center;cursor:zoom-out}
 .lightbox.open{display:flex}
-.lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.lightbox img{max-width:90vw;max-height:90vh;border-radius:8px}
 
 /* Brands modal */
 .brands-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:300;align-items:center;justify-content:center;padding:16px}
 .brands-bg.open{display:flex}
 .brands-modal{background:var(--surface);border-radius:var(--rlg);border:1px solid var(--border2);padding:24px;width:380px;max-width:100%;box-shadow:0 8px 40px rgba(0,0,0,.15)}
 
-/* Responsive */
 @media(max-width:780px){
   .t-head,.task-row{grid-template-columns:16px minmax(0,1fr) 90px 80px}
   .t-head .th:nth-child(n+5),.task-row .td:nth-child(n+5){display:none}
   .stats{grid-template-columns:repeat(2,1fr)}
   .props{grid-template-columns:1fr}
   .prop.l{border-right:none}
-  .prop:nth-last-child(-n+2){border-bottom:1px solid var(--border)}
-  .prop:last-child{border-bottom:none}
   .modal{width:100%}
   .overlay{padding:12px 8px}
 }
@@ -209,16 +198,26 @@ button{cursor:pointer}
 </head>
 <body>
 
+<!-- Loading -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <span style="font-size:13px;color:var(--txt2)">Henter opgaver…</span>
+</div>
+
 <!-- NAV -->
 <nav class="nav">
   <span class="nav-logo">Bestseller</span>
   <div class="nav-div"></div>
   <span class="nav-space">Paid Social — Jakob Space</span>
-  <div class="nav-right"><div class="avatar">JR</div></div>
+  <div class="nav-right">
+    <span class="save-indicator" id="saveIndicator" style="opacity:0">
+      <i class="ti ti-check" style="font-size:13px"></i><span id="saveText">Gemt</span>
+    </span>
+    <div class="avatar">JR</div>
+  </div>
 </nav>
 
 <div class="app">
-
   <!-- TOOLBAR -->
   <div class="toolbar">
     <span class="tb-title"><i class="ti ti-list-details"></i>Task board</span>
@@ -242,18 +241,16 @@ button{cursor:pointer}
       <option value="created">Nyeste oprettet</option>
     </select>
     <div class="date-filters">
-      <button class="df-btn" id="df-today" onclick="toggleFilter('today')"><i class="ti ti-sun"></i>I dag</button>
-      <button class="df-btn" id="df-week"  onclick="toggleFilter('week')"><i class="ti ti-calendar-week"></i>Denne uge</button>
+      <button class="df-btn" id="df-today"   onclick="toggleFilter('today')"><i class="ti ti-sun"></i>I dag</button>
+      <button class="df-btn" id="df-week"    onclick="toggleFilter('week')"><i class="ti ti-calendar-week"></i>Denne uge</button>
       <button class="df-btn" id="df-overdue" onclick="toggleFilter('overdue')"><i class="ti ti-alert-circle"></i>Forsinkede</button>
     </div>
     <button class="btn-out" onclick="openBrands()"><i class="ti ti-tag"></i>Brands</button>
     <button class="btn-new" onclick="openNew()"><i class="ti ti-plus"></i>Ny opgave</button>
   </div>
 
-  <!-- STATS -->
   <div class="stats" id="stats"></div>
 
-  <!-- TABLE -->
   <div class="table-wrap">
     <div class="t-head">
       <div class="th"></div>
@@ -268,35 +265,27 @@ button{cursor:pointer}
   </div>
 </div>
 
-<!-- ─── TASK MODAL ─── -->
+<!-- TASK MODAL -->
 <div class="overlay" id="taskOverlay" onmousedown="overlayBg(event)">
-<div class="modal" id="taskModal">
-
+<div class="modal">
   <div class="modal-topbar">
     <div class="type-badge"><i class="ti ti-circle-dot" style="color:#3b82f6;font-size:13px"></i>Task</div>
     <span class="m-sid" id="mSid"></span>
-    <button class="ai-btn" onclick="triggerAI()"><i class="ti ti-sparkles" style="font-size:12px"></i>Ask AI</button>
+    <button class="ai-btn" onclick="window.open('https://claude.ai','_blank')"><i class="ti ti-sparkles" style="font-size:12px"></i>Ask AI</button>
     <button class="close-x" onclick="closeModal()"><i class="ti ti-x"></i></button>
   </div>
-
   <div class="modal-body">
-
-    <!-- Title -->
     <input class="m-title" id="fTitle" type="text" placeholder="Skriv opgavetitel…" autocomplete="off">
-
-    <!-- Props grid -->
     <div class="props" id="propsGrid">
       <div class="prop l">
         <i class="ti ti-circle-half p-icon"></i>
         <span class="p-lbl">Status</span>
-        <div class="p-val">
-          <select class="p-sel" id="fStatus" onchange="onStatusChange(this.value)">
-            <option value="todo">To Do</option>
-            <option value="ready">Ready for Production</option>
-            <option value="inprogress">In Progress</option>
-            <option value="complete">Complete</option>
-          </select>
-        </div>
+        <div class="p-val"><select class="p-sel" id="fStatus" onchange="onStatusChange(this.value)">
+          <option value="todo">To Do</option>
+          <option value="ready">Ready for Production</option>
+          <option value="inprogress">In Progress</option>
+          <option value="complete">Complete</option>
+        </select></div>
       </div>
       <div class="prop">
         <i class="ti ti-tag p-icon"></i>
@@ -306,32 +295,24 @@ button{cursor:pointer}
       <div class="prop l">
         <i class="ti ti-calendar p-icon"></i>
         <span class="p-lbl">Startdato</span>
-        <div class="p-val">
-          <input class="p-inp" id="fStart" type="date"
-            onpointerdown="openDatePicker(event,this)"
-            onkeydown="if(event.key==='Enter'||event.key===' ')openDatePicker(event,this)">
-        </div>
+        <div class="p-val"><input class="p-inp" id="fStart" type="date"
+          onpointerdown="openDatePicker(event,this)"></div>
       </div>
       <div class="prop">
         <i class="ti ti-calendar-due p-icon"></i>
         <span class="p-lbl">Deadline</span>
-        <div class="p-val">
-          <input class="p-inp" id="fDue" type="date"
-            onpointerdown="openDatePicker(event,this)"
-            onkeydown="if(event.key==='Enter'||event.key===' ')openDatePicker(event,this)">
-        </div>
+        <div class="p-val"><input class="p-inp" id="fDue" type="date"
+          onpointerdown="openDatePicker(event,this)"></div>
       </div>
       <div class="prop l">
         <i class="ti ti-flag p-icon"></i>
         <span class="p-lbl">Prioritet</span>
-        <div class="p-val">
-          <select class="p-sel" id="fPriF">
-            <option value="">Ingen</option>
-            <option value="høj">🔴 Høj</option>
-            <option value="medium">🟡 Medium</option>
-            <option value="lav">🟢 Lav</option>
-          </select>
-        </div>
+        <div class="p-val"><select class="p-sel" id="fPriF">
+          <option value="">Ingen</option>
+          <option value="høj">🔴 Høj</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="lav">🟢 Lav</option>
+        </select></div>
       </div>
       <div class="prop">
         <i class="ti ti-hash p-icon"></i>
@@ -340,58 +321,52 @@ button{cursor:pointer}
       </div>
     </div>
 
-    <!-- Rich editor -->
-    <div class="editor-section">
-      <div class="editor-lbl">Beskrivelse</div>
-      <div class="editor-wrap" id="editorWrap"
-        ondragover="wrapDragOver(event)" ondragleave="wrapDragLeave()" ondrop="wrapDrop(event)">
-        <div class="ed-toolbar">
-          <button class="etb" onclick="fmt('bold')" title="Fed"><b style="font-size:14px">B</b></button>
-          <button class="etb" onclick="fmt('italic')" title="Kursiv"><i style="font-size:14px">I</i></button>
-          <button class="etb" onclick="fmt('underline')" title="Understreg"><span style="text-decoration:underline">U</span></button>
-          <button class="etb" onclick="fmt('strikeThrough')" title="Gns."><span style="text-decoration:line-through">S</span></button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="fmtBlock('h2')" title="H1" style="font-size:12px;font-weight:700">H1</button>
-          <button class="etb" onclick="fmtBlock('h3')" title="H2" style="font-size:11px;font-weight:700">H2</button>
-          <button class="etb" onclick="fmtBlock('p')" title="Normal">¶</button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="fmt('insertUnorderedList')" title="Liste"><i class="ti ti-list"></i></button>
-          <button class="etb" onclick="fmt('insertOrderedList')" title="Numm. liste"><i class="ti ti-list-numbers"></i></button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="doLink()" title="Link"><i class="ti ti-link"></i></button>
-          <button class="etb" onclick="triggerImgUpload()" title="Billede"><i class="ti ti-photo"></i></button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="clearDesc()" title="Ryd" style="color:#dc2626"><i class="ti ti-trash"></i></button>
-        </div>
-        <div class="ed-area" id="edArea" contenteditable="true"
-          data-placeholder="Tilføj beskrivelse, noter eller links…" spellcheck="false"></div>
-        <div class="img-grid" id="imgGrid"></div>
-        <div class="drop-zone" id="dropZone" onclick="triggerImgUpload()"
-          ondragover="dzDragOver(event)" ondragleave="dzDragLeave()" ondrop="dzDrop(event)">
-          <i class="ti ti-cloud-upload"></i>
-          Drag & drop billeder her, eller klik for at uploade
-        </div>
+    <div class="editor-lbl">Beskrivelse</div>
+    <div class="editor-wrap" id="editorWrap"
+      ondragover="wrapDragOver(event)" ondragleave="wrapDragLeave()" ondrop="wrapDrop(event)">
+      <div class="ed-toolbar">
+        <button class="etb" onclick="fmt('bold')"><b style="font-size:14px">B</b></button>
+        <button class="etb" onclick="fmt('italic')"><i style="font-size:14px">I</i></button>
+        <button class="etb" onclick="fmt('underline')"><span style="text-decoration:underline">U</span></button>
+        <button class="etb" onclick="fmt('strikeThrough')"><span style="text-decoration:line-through">S</span></button>
+        <div class="etb-sep"></div>
+        <button class="etb" onclick="fmtBlock('h2')" style="font-size:12px;font-weight:700">H1</button>
+        <button class="etb" onclick="fmtBlock('h3')" style="font-size:11px;font-weight:700">H2</button>
+        <button class="etb" onclick="fmtBlock('p')">¶</button>
+        <div class="etb-sep"></div>
+        <button class="etb" onclick="fmt('insertUnorderedList')"><i class="ti ti-list"></i></button>
+        <button class="etb" onclick="fmt('insertOrderedList')"><i class="ti ti-list-numbers"></i></button>
+        <div class="etb-sep"></div>
+        <button class="etb" onclick="doLink()"><i class="ti ti-link"></i></button>
+        <button class="etb" onclick="triggerImgUpload()"><i class="ti ti-photo"></i></button>
+        <div class="etb-sep"></div>
+        <button class="etb" onclick="clearDesc()" style="color:#dc2626"><i class="ti ti-trash"></i></button>
+      </div>
+      <div class="ed-area" id="edArea" contenteditable="true"
+        data-placeholder="Tilføj beskrivelse, noter eller links…" spellcheck="false"></div>
+      <div class="img-grid" id="imgGrid"></div>
+      <div class="drop-zone" id="dropZone" onclick="triggerImgUpload()"
+        ondragover="dzDragOver(event)" ondragleave="dzDragLeave()" ondrop="dzDrop(event)">
+        <i class="ti ti-cloud-upload"></i>
+        Drag & drop billeder her, eller klik for at uploade
       </div>
     </div>
-
     <input type="file" id="imgInput" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
   </div>
-
   <div class="modal-footer">
     <button class="btn-del" id="delBtn" onclick="delTask()"><i class="ti ti-trash" style="margin-right:4px"></i>Slet opgave</button>
     <button class="btn-cancel" onclick="closeModal()">Annuller</button>
     <button class="btn-save" onclick="saveTask()"><i class="ti ti-check" style="margin-right:4px"></i>Gem</button>
   </div>
-
 </div>
 </div>
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lbImg" src="" alt="Preview">
+  <img id="lbImg" src="" alt="">
 </div>
 
-<!-- POPUP DROPDOWN -->
+<!-- POPUP -->
 <div class="popup" id="popup"></div>
 
 <!-- BRANDS MODAL -->
@@ -415,9 +390,12 @@ button{cursor:pointer}
 </div>
 
 <script>
-// ───────────────────────────────────────────
-//  CONFIG
-// ───────────────────────────────────────────
+// ─── SUPABASE ───────────────────────────────────────────
+const SUPABASE_URL = 'https://fmcluadylxigejbfqktl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtY2x1YWR5bHhpZ2VqYmZxa3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMTQ3NDYsImV4cCI6MjA5NTU5MDc0Nn0.CetSfkZhVqYZVDzCu5U3dioBnl9qSZr7VBgn-kw3bzA';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ─── CONFIG ─────────────────────────────────────────────
 const SECTIONS = [
   { id:'todo',       label:'To Do',                color:'#9b9a95' },
   { id:'ready',      label:'Ready for Production', color:'#e07d2a' },
@@ -441,39 +419,106 @@ const DEF_BRANDS = [
   { id:'intern',     name:'Internt',     bg:'#F1EFE8', c:'#444441' }
 ];
 
-// ───────────────────────────────────────────
-//  STATE
-// ───────────────────────────────────────────
+// ─── STATE ──────────────────────────────────────────────
 let tasks=[], brands=[], editId=null, collapsed={}, activeFilter=null, modalImages=[];
 
-function load(){
-  try{ tasks=JSON.parse(localStorage.getItem('bsv6_tasks'))||seed(); }catch(e){tasks=seed();}
-  try{ brands=JSON.parse(localStorage.getItem('bsv6_brands'))||[...DEF_BRANDS]; }catch(e){brands=[...DEF_BRANDS];}
+// ─── SUPABASE CRUD ──────────────────────────────────────
+async function dbLoadAll(){
+  const [tr, br] = await Promise.all([
+    sb.from('tasks').select('*').order('created_at', {ascending:true}),
+    sb.from('brands').select('*').order('name', {ascending:true})
+  ]);
+  if(tr.error) console.error('Tasks load error:', tr.error);
+  if(br.error) console.error('Brands load error:', br.error);
+
+  tasks = (tr.data||[]).map(dbToTask);
+  brands = br.data?.length ? br.data : [...DEF_BRANDS];
 }
-function save(){
-  try{localStorage.setItem('bsv6_tasks', JSON.stringify(tasks));}catch(e){}
-  try{localStorage.setItem('bsv6_brands',JSON.stringify(brands));}catch(e){}
+
+function taskToDb(t){
+  return {
+    id: t.id,
+    sid: t.sid,
+    name: t.name,
+    brand: t.brand,
+    status: t.status,
+    start_date: t.start || null,
+    due_date: t.due || null,
+    priority: t.priority || null,
+    tags: t.tags || null,
+    description: t.desc || null,
+    images: t.images || [],
+    created_at: t.created || Date.now()
+  };
 }
+function dbToTask(r){
+  return {
+    id: r.id,
+    sid: r.sid || mkSid(),
+    name: r.name,
+    brand: r.brand || 'intern',
+    status: r.status || 'todo',
+    start: r.start_date || '',
+    due: r.due_date || '',
+    priority: r.priority || '',
+    tags: r.tags || '',
+    desc: r.description || '',
+    images: r.images || [],
+    created: r.created_at || Date.now()
+  };
+}
+
+async function dbUpsertTask(t){
+  showSaving();
+  const { error } = await sb.from('tasks').upsert(taskToDb(t));
+  if(error){ showError(); console.error('Save error:', error); }
+  else showSaved();
+}
+async function dbDeleteTask(id){
+  showSaving();
+  const { error } = await sb.from('tasks').delete().eq('id', id);
+  if(error){ showError(); console.error('Delete error:', error); }
+  else showSaved();
+}
+async function dbUpsertBrand(b){
+  const { error } = await sb.from('brands').upsert(b);
+  if(error) console.error('Brand save error:', error);
+}
+async function dbDeleteBrand(id){
+  const { error } = await sb.from('brands').delete().eq('id', id);
+  if(error) console.error('Brand delete error:', error);
+}
+
+// ─── SAVE INDICATOR ─────────────────────────────────────
+let saveTimer=null;
+function showSaving(){
+  const el=document.getElementById('saveIndicator');
+  const txt=document.getElementById('saveText');
+  el.className='save-indicator saving'; el.style.opacity='1';
+  txt.textContent='Gemmer…';
+  el.querySelector('i').className='ti ti-loader-2';
+}
+function showSaved(){
+  const el=document.getElementById('saveIndicator');
+  const txt=document.getElementById('saveText');
+  el.className='save-indicator'; el.style.opacity='1';
+  txt.textContent='Gemt';
+  el.querySelector('i').className='ti ti-check';
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{ el.style.opacity='0'; },2500);
+}
+function showError(){
+  const el=document.getElementById('saveIndicator');
+  const txt=document.getElementById('saveText');
+  el.className='save-indicator error'; el.style.opacity='1';
+  txt.textContent='Fejl ved gem';
+  el.querySelector('i').className='ti ti-alert-circle';
+}
+
+// ─── HELPERS ────────────────────────────────────────────
 function uid(){ return 't'+Date.now()+Math.random().toString(36).slice(2,5) }
 function mkSid(){ return Math.random().toString(36).slice(2,10).toUpperCase() }
-
-function seed(){
-  return[
-    {id:'t1',sid:'86C9K9968',name:'LA: 4062 euro fra marketing i finansåret',brand:'lilatelier',status:'todo',start:'',due:'2026-04-30',priority:'',desc:'',tags:'',images:[],created:Date.now()-9e6},
-    {id:'t2',sid:mkSid(),name:'Pinterest: Credit Line (invoicing)',brand:'nameit',status:'todo',start:'',due:'',priority:'',desc:'',tags:'',images:[],created:Date.now()-8e6},
-    {id:'t3',sid:mkSid(),name:'Videoguides til Tenna',brand:'intern',status:'todo',start:'',due:'',priority:'medium',desc:'',tags:'',images:[],created:Date.now()-7e6},
-    {id:'t4',sid:mkSid(),name:'Summer campaign brief Q2',brand:'nameit',status:'ready',start:'2026-05-20',due:'2026-05-25',priority:'høj',desc:'',tags:'',images:[],created:Date.now()-6e6},
-    {id:'t5',sid:mkSid(),name:'TikTok creative refresh — Lil Atelier SS26',brand:'lilatelier',status:'inprogress',start:'2026-05-18',due:'2026-05-30',priority:'medium',desc:'',tags:'',images:[],created:Date.now()-5e6},
-    {id:'t6',sid:mkSid(),name:'Ekstra budget fra Oliver - meta [2500 EUR]',brand:'lilatelier',status:'complete',start:'2026-02-20',due:'',priority:'høj',desc:'',tags:'',images:[],created:Date.now()-4e6},
-    {id:'t7',sid:mkSid(),name:'Lead ad exclusing active wear and LMTD images',brand:'nameit',status:'complete',start:'2026-02-23',due:'2026-02-23',priority:'',desc:'',tags:'',images:[],created:Date.now()-3e6},
-    {id:'t8',sid:mkSid(),name:'New branding video to track',brand:'lilatelier',status:'complete',start:'2026-02-25',due:'',priority:'',desc:'',tags:'',images:[],created:Date.now()-2e6},
-    {id:'t9',sid:mkSid(),name:'New ads: cherry print',brand:'lilatelier',status:'complete',start:'2026-02-26',due:'',priority:'lav',desc:'',tags:'',images:[],created:Date.now()-1e6}
-  ];
-}
-
-// ───────────────────────────────────────────
-//  DATE HELPERS
-// ───────────────────────────────────────────
+function getBrand(id){ return brands.find(b=>b.id===id)||{name:'Ukendt',bg:'#f1f0ec',c:'#5a5a55'} }
 function today(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
 function dateSt(due,status){
   if(!due||status==='complete') return 'future';
@@ -489,23 +534,16 @@ function fmtD(s){
   return new Date(s).toLocaleDateString('da-DK',{day:'numeric',month:'short'});
 }
 function smartScore(t){
-  // Tasks with a start date sort by start date first, then due date, then no-date last
-  if(t.start){
-    const d=new Date(t.start); d.setHours(0,0,0,0);
-    return d.getTime();
-  }
-  if(t.due){
-    const d=new Date(t.due); d.setHours(0,0,0,0);
-    // Put due-only tasks after all start-date tasks
-    return d.getTime() + 1e13;
-  }
+  if(t.start){ const d=new Date(t.start); d.setHours(0,0,0,0); return d.getTime(); }
+  if(t.due){   const d=new Date(t.due);   d.setHours(0,0,0,0); return d.getTime()+1e13; }
   return 9e15;
 }
-function getBrand(id){ return brands.find(b=>b.id===id)||{name:'Ukendt',bg:'#f1f0ec',c:'#5a5a55'} }
+function openDatePicker(e,el){
+  e.preventDefault(); el.focus();
+  try{ el.showPicker(); }catch(err){}
+}
 
-// ───────────────────────────────────────────
-//  FILTER
-// ───────────────────────────────────────────
+// ─── FILTER & SORT ──────────────────────────────────────
 function toggleFilter(f){
   activeFilter = activeFilter===f ? null : f;
   document.querySelectorAll('.df-btn').forEach(b=>b.classList.remove('active'));
@@ -516,7 +554,7 @@ function filtered(){
   const q=document.getElementById('srch').value.toLowerCase();
   const fb=document.getElementById('fBrand').value;
   const fp=document.getElementById('fPri').value;
-  const sb=document.getElementById('sortBy').value;
+  const sb2=document.getElementById('sortBy').value;
   const t0=today(), tEnd=new Date(t0.getTime()+7*864e5);
 
   let res=tasks.filter(t=>{
@@ -537,18 +575,16 @@ function filtered(){
     return true;
   });
 
-  if(sb==='start')res.sort((a,b)=>(a.start||'9999')>(b.start||'9999')?1:-1);
-  else if(sb==='smart')res.sort((a,b)=>smartScore(a)-smartScore(b));
-  else if(sb==='due') res.sort((a,b)=>(a.due||'9999')>(b.due||'9999')?1:-1);
-  else if(sb==='priority'){const o={høj:0,medium:1,lav:2,'':3};res.sort((a,b)=>o[a.priority]-o[b.priority]);}
-  else if(sb==='name')res.sort((a,b)=>a.name.localeCompare(b.name));
-  else if(sb==='created')res.sort((a,b)=>(b.created||0)-(a.created||0));
+  if(sb2==='start') res.sort((a,b)=>(a.start||'9999')>(b.start||'9999')?1:-1);
+  else if(sb2==='smart')    res.sort((a,b)=>smartScore(a)-smartScore(b));
+  else if(sb2==='due')      res.sort((a,b)=>(a.due||'9999')>(b.due||'9999')?1:-1);
+  else if(sb2==='priority'){const o={høj:0,medium:1,lav:2,'':3};res.sort((a,b)=>o[a.priority]-o[b.priority]);}
+  else if(sb2==='name')     res.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sb2==='created')  res.sort((a,b)=>(b.created||0)-(a.created||0));
   return res;
 }
 
-// ───────────────────────────────────────────
-//  RENDER
-// ───────────────────────────────────────────
+// ─── RENDER ─────────────────────────────────────────────
 function renderStats(){
   const c={todo:0,ready:0,inprogress:0,complete:0}; let od=0;
   tasks.forEach(t=>{ if(c[t.status]!=null)c[t.status]++; if(dateSt(t.due,t.status)==='overdue')od++; });
@@ -556,96 +592,70 @@ function renderStats(){
     <div class="stat"><div class="stat-dot" style="background:#9b9a95"></div><div><div class="stat-lbl">To Do</div><div class="stat-n">${c.todo}</div></div></div>
     <div class="stat"><div class="stat-dot" style="background:#e07d2a"></div><div><div class="stat-lbl">Ready / In Progress</div><div class="stat-n">${c.ready+c.inprogress}</div></div></div>
     <div class="stat"><div class="stat-dot" style="background:#22c55e"></div><div><div class="stat-lbl">Complete</div><div class="stat-n">${c.complete}</div></div></div>
-    <div class="stat"><div class="stat-dot" style="background:#ef4444"></div><div><div class="stat-lbl">Forsinkede</div><div class="${od?'stat-red':'stat-n'}">${od}</div></div></div>
-  `;
+    <div class="stat"><div class="stat-dot" style="background:#ef4444"></div><div><div class="stat-lbl">Forsinkede</div><div class="${od?'stat-red':'stat-n'}">${od}</div></div></div>`;
 }
 function updateBrandFilter(){
   const sel=document.getElementById('fBrand'), cur=sel.value;
   sel.innerHTML='<option value="">Alle brands</option>';
-  brands.forEach(b=>{const o=new Option(b.name,b.id);if(b.id===cur)o.selected=true;sel.add(o);});
+  brands.forEach(b=>{ const o=new Option(b.name,b.id); if(b.id===cur)o.selected=true; sel.add(o); });
 }
-
 function render(){
   renderStats(); updateBrandFilter();
   const ft=filtered();
   const body=document.getElementById('listBody');
   body.innerHTML='';
-
   SECTIONS.forEach(sec=>{
     const rows=ft.filter(t=>t.status===sec.id);
     const sc=STATUS[sec.id];
     const wrap=document.createElement('div');
-
-    // Section header
     const hdr=document.createElement('div');
     hdr.className='sec-hdr';
-    hdr.innerHTML=`
-      <div class="sec-dot" style="background:${sec.color}"></div>
+    hdr.innerHTML=`<div class="sec-dot" style="background:${sec.color}"></div>
       <span class="sec-lbl">${sec.label}</span>
       <span class="sec-cnt">${rows.length}</span>
-      <i class="ti ${collapsed[sec.id]?'ti-chevron-right':'ti-chevron-down'} chev"></i>`;
+      <i class="ti ${collapsed[sec.id]?'ti-chevron-right':'ti-chevron-down'}" style="font-size:12px;color:var(--txt3);margin-left:auto"></i>`;
     hdr.onclick=()=>{ collapsed[sec.id]=!collapsed[sec.id]; render(); };
     wrap.appendChild(hdr);
-
     if(!collapsed[sec.id]){
       rows.forEach(t=>{
         const br=getBrand(t.brand);
         const pr=t.priority&&PRI[t.priority];
-        // date display
-        const dsSt=dateSt(t.start, t.status==='complete'?'complete':'active');
-        const dsDu=dateSt(t.due,   t.status);
-        const startTxt=t.start ? fmtD(t.start) : '';
-        const dueTxt  =t.due   ? fmtD(t.due)   : '';
-        const dueIcon = dsDu==='overdue'?'ti-alert-circle':dsDu==='today'?'ti-clock':'ti-calendar-due';
-
+        const dsDu=dateSt(t.due, t.status);
+        const dueIcon=dsDu==='overdue'?'ti-alert-circle':dsDu==='today'?'ti-clock':'ti-calendar-due';
         const row=document.createElement('div');
         row.className='task-row';
         row.innerHTML=`
           <div class="td" style="justify-content:center">
             <div class="status-dot" style="background:${sc.dot}" title="${sec.label}"></div>
           </div>
-          <div class="td">
-            <span class="task-name" data-id="${t.id}">${t.name}</span>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="brand">
-              <span class="brand-pill" style="background:${br.bg};color:${br.c}">${br.name}</span>
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="status">
-              <span class="status-chip" style="background:${sc.bg};color:${sc.c}">${sc.label}</span>
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="start">
-              ${startTxt
-                ? `<i class="ti ti-calendar" style="font-size:12px;color:var(--txt3)"></i><span class="date-cell future">${startTxt}</span>`
-                : `<span class="date-cell empty">—</span>`}
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="due">
-              ${dueTxt
-                ? `<i class="ti ${dueIcon}" style="font-size:12px"></i><span class="date-cell ${dsDu}">${dsDu==='overdue'?'Forsinket':dsDu==='today'?'I dag':dueTxt}</span>`
-                : `<span class="date-cell empty">—</span>`}
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="priority">
-              ${pr
-                ? `<span class="pri-dot" style="background:${pr.dot}"></span><span style="font-size:12.5px;color:${pr.c}">${t.priority}</span>`
-                : `<span style="color:var(--txt3);font-size:12.5px">—</span>`}
-            </div>
-          </div>
-        `;
-        row.querySelector('.task-name').addEventListener('click', e=>{ e.stopPropagation(); openEdit(t.id); });
+          <div class="td"><span class="task-name" data-id="${t.id}">${t.name}</span></div>
+          <div class="td"><div class="ic" data-id="${t.id}" data-f="brand">
+            <span class="brand-pill" style="background:${br.bg};color:${br.c}">${br.name}</span>
+          </div></div>
+          <div class="td"><div class="ic" data-id="${t.id}" data-f="status">
+            <span class="status-chip" style="background:${sc.bg};color:${sc.c}">${sc.label}</span>
+          </div></div>
+          <div class="td"><div class="ic" data-id="${t.id}" data-f="start">
+            ${t.start
+              ?`<i class="ti ti-calendar" style="font-size:12px;color:var(--txt3)"></i><span class="date-cell future">${fmtD(t.start)}</span>`
+              :`<span class="date-cell empty">—</span>`}
+          </div></div>
+          <div class="td"><div class="ic" data-id="${t.id}" data-f="due">
+            ${t.due
+              ?`<i class="ti ${dueIcon}" style="font-size:12px"></i><span class="date-cell ${dsDu}">${dsDu==='overdue'?'Forsinket':dsDu==='today'?'I dag':fmtD(t.due)}</span>`
+              :`<span class="date-cell empty">—</span>`}
+          </div></div>
+          <div class="td"><div class="ic" data-id="${t.id}" data-f="priority">
+            ${pr
+              ?`<span class="pri-dot" style="background:${pr.dot}"></span><span style="font-size:12.5px;color:${pr.c}">${t.priority}</span>`
+              :`<span style="color:var(--txt3);font-size:12.5px">—</span>`}
+          </div></div>`;
+        row.querySelector('.task-name').addEventListener('click',e=>{ e.stopPropagation(); openEdit(t.id); });
         row.querySelectorAll('.ic').forEach(cell=>{
-          cell.addEventListener('click', e=>{ e.stopPropagation(); openInline(cell, t.id, cell.dataset.f); });
+          cell.addEventListener('click',e=>{ e.stopPropagation(); openInline(cell,t.id,cell.dataset.f); });
         });
         wrap.appendChild(row);
       });
-
       const add=document.createElement('div');
       add.className='add-row';
       add.innerHTML='<i class="ti ti-plus" style="font-size:13px"></i>Tilføj opgave';
@@ -656,24 +666,19 @@ function render(){
   });
 }
 
-// ───────────────────────────────────────────
-//  INLINE EDITING
-// ───────────────────────────────────────────
-let activePopup=null, inlineDateEl=null;
-
+// ─── INLINE EDITING ─────────────────────────────────────
+let inlineDateEl=null;
 function closePopup(){
-  const p=document.getElementById('popup');
-  p.classList.remove('open');
+  document.getElementById('popup').classList.remove('open');
   if(inlineDateEl){ inlineDateEl.remove(); inlineDateEl=null; }
 }
 document.addEventListener('click', closePopup);
 
-function openInline(cell, taskId, field){
+function openInline(cell,taskId,field){
   closePopup();
   const t=tasks.find(x=>x.id===taskId); if(!t)return;
   const rect=cell.getBoundingClientRect();
   const p=document.getElementById('popup');
-
   if(field==='status'){
     p.innerHTML='';
     SECTIONS.forEach(sec=>{
@@ -681,35 +686,35 @@ function openInline(cell, taskId, field){
       const item=document.createElement('div');
       item.className='pop-item'+(t.status===sec.id?' active':'');
       item.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${sc.dot};flex-shrink:0"></div>${sec.label}`;
-      item.onclick=e=>{ e.stopPropagation(); t.status=sec.id; save(); closePopup(); render(); };
+      item.onclick=async e=>{ e.stopPropagation(); t.status=sec.id; closePopup(); render(); await dbUpsertTask(t); };
       p.appendChild(item);
     });
-    posPopup(p, rect);
+    posPopup(p,rect);
   } else if(field==='brand'){
     p.innerHTML='';
     brands.forEach(b=>{
       const item=document.createElement('div');
       item.className='pop-item'+(t.brand===b.id?' active':'');
       item.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${b.c};flex-shrink:0"></div>${b.name}`;
-      item.onclick=e=>{ e.stopPropagation(); t.brand=b.id; save(); closePopup(); render(); };
+      item.onclick=async e=>{ e.stopPropagation(); t.brand=b.id; closePopup(); render(); await dbUpsertTask(t); };
       p.appendChild(item);
     });
-    posPopup(p, rect);
+    posPopup(p,rect);
   } else if(field==='priority'){
     p.innerHTML='';
-    const noneItem=document.createElement('div');
-    noneItem.className='pop-item'+(!t.priority?' active':'');
-    noneItem.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:var(--txt3);flex-shrink:0"></div>Ingen`;
-    noneItem.onclick=e=>{ e.stopPropagation(); t.priority=''; save(); closePopup(); render(); };
-    p.appendChild(noneItem);
+    const ni=document.createElement('div');
+    ni.className='pop-item'+(!t.priority?' active':'');
+    ni.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:var(--txt3);flex-shrink:0"></div>Ingen`;
+    ni.onclick=async e=>{ e.stopPropagation(); t.priority=''; closePopup(); render(); await dbUpsertTask(t); };
+    p.appendChild(ni);
     Object.entries(PRI).forEach(([k,v])=>{
       const item=document.createElement('div');
       item.className='pop-item'+(t.priority===k?' active':'');
       item.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${v.dot};flex-shrink:0"></div>${k}`;
-      item.onclick=e=>{ e.stopPropagation(); t.priority=k; save(); closePopup(); render(); };
+      item.onclick=async e=>{ e.stopPropagation(); t.priority=k; closePopup(); render(); await dbUpsertTask(t); };
       p.appendChild(item);
     });
-    posPopup(p, rect);
+    posPopup(p,rect);
   } else if(field==='start'||field==='due'){
     const inp=document.createElement('input');
     inp.type='date'; inp.value=t[field]||'';
@@ -719,21 +724,20 @@ function openInline(cell, taskId, field){
     document.body.appendChild(inp);
     inlineDateEl=inp;
     setTimeout(()=>{ try{ inp.showPicker&&inp.showPicker(); }catch(e){} },40);
-    inp.addEventListener('change',e=>{ e.stopPropagation(); t[field]=inp.value; save(); closePopup(); render(); });
+    inp.addEventListener('change',async e=>{ e.stopPropagation(); t[field]=inp.value; closePopup(); render(); await dbUpsertTask(t); });
     inp.addEventListener('click',e=>e.stopPropagation());
   }
 }
-function posPopup(p, rect){
+function posPopup(p,rect){
   p.style.left=Math.min(rect.left, window.innerWidth-180)+'px';
   p.style.top=(rect.bottom+4)+'px';
   p.classList.add('open');
-  p.addEventListener('click',e=>e.stopPropagation(),{once:false});
+  p.addEventListener('click',e=>e.stopPropagation());
 }
 
-// ───────────────────────────────────────────
-//  MODAL
-// ───────────────────────────────────────────
+// ─── MODAL ──────────────────────────────────────────────
 function overlayBg(e){ if(e.target===document.getElementById('taskOverlay'))closeModal(); }
+function closeModal(){ document.getElementById('taskOverlay').classList.remove('open'); }
 
 function openNew(secId){
   editId=null; modalImages=[];
@@ -752,11 +756,10 @@ function openNew(secId){
   document.getElementById('taskOverlay').classList.add('open');
   setTimeout(()=>document.getElementById('fTitle').focus(),80);
 }
-
 function openEdit(id){
   const t=tasks.find(x=>x.id===id); if(!t)return;
   editId=id; modalImages=[...(t.images||[])];
-  document.getElementById('mSid').textContent=t.sid||id.slice(1,9).toUpperCase();
+  document.getElementById('mSid').textContent=t.sid||id.slice(0,8).toUpperCase();
   document.getElementById('fTitle').value=t.name;
   document.getElementById('fStatus').value=t.status;
   onStatusChange(t.status);
@@ -771,25 +774,16 @@ function openEdit(id){
   document.getElementById('taskOverlay').classList.add('open');
   setTimeout(()=>document.getElementById('fTitle').focus(),80);
 }
-
 function onStatusChange(val){
-  const v=val||document.getElementById('fStatus').value;
-  const sc=STATUS[v];
-  if(!sc)return;
+  const sc=STATUS[val]; if(!sc)return;
   const pg=document.getElementById('propsGrid');
-  pg.style.borderColor=sc.dot+'55';
-  pg.querySelectorAll('.prop').forEach(p=>{
-    p.style.borderBottomColor=sc.dot+'33';
-    p.style.borderRightColor=sc.dot+'33';
-  });
+  pg.style.borderColor=sc.dot+'66';
 }
-
 function popBrandSel(sel,selected){
   sel.innerHTML='';
   brands.forEach(b=>{ const o=new Option(b.name,b.id); if(b.id===selected)o.selected=true; sel.add(o); });
 }
-
-function saveTask(){
+async function saveTask(){
   const title=document.getElementById('fTitle').value.trim(); if(!title)return;
   const obj={
     name:title, brand:document.getElementById('fBrandF').value,
@@ -801,37 +795,29 @@ function saveTask(){
     desc:document.getElementById('edArea').innerHTML,
     images:[...modalImages]
   };
-  if(editId){ const t=tasks.find(x=>x.id===editId); if(t)Object.assign(t,obj); }
-  else tasks.push({id:uid(),sid:mkSid(),created:Date.now(),...obj});
-  save(); closeModal(); render();
+  if(editId){
+    const t=tasks.find(x=>x.id===editId);
+    if(t){ Object.assign(t,obj); await dbUpsertTask(t); }
+  } else {
+    const t={id:uid(),sid:mkSid(),created:Date.now(),...obj};
+    tasks.push(t);
+    await dbUpsertTask(t);
+  }
+  closeModal(); render();
 }
-
-function delTask(){
+async function delTask(){
   if(!editId)return;
   if(!confirm('Vil du slette denne opgave?'))return;
+  await dbDeleteTask(editId);
   tasks=tasks.filter(t=>t.id!==editId);
-  save(); closeModal(); render();
+  closeModal(); render();
 }
 
-function closeModal(){
-  document.getElementById('taskOverlay').classList.remove('open');
-}
-
-// ───────────────────────────────────────────
-//  EDITOR
-// ───────────────────────────────────────────
+// ─── EDITOR ─────────────────────────────────────────────
 function fmt(cmd){ document.getElementById('edArea').focus(); document.execCommand(cmd,false,null); }
 function fmtBlock(t){ document.getElementById('edArea').focus(); document.execCommand('formatBlock',false,t); }
-function clearDesc(){ if(confirm('Ryd al tekst i beskrivelsen?'))document.getElementById('edArea').innerHTML=''; }
-function doLink(){
-  const url=prompt('URL:'); if(!url)return;
-  document.getElementById('edArea').focus();
-  document.execCommand('createLink',false,url);
-}
-
-// ───────────────────────────────────────────
-//  IMAGES
-// ───────────────────────────────────────────
+function clearDesc(){ if(confirm('Ryd beskrivelsen?'))document.getElementById('edArea').innerHTML=''; }
+function doLink(){ const u=prompt('URL:'); if(!u)return; document.getElementById('edArea').focus(); document.execCommand('createLink',false,u); }
 function triggerImgUpload(){ document.getElementById('imgInput').click(); }
 function handleFiles(files){
   Array.from(files).forEach(f=>{
@@ -842,12 +828,10 @@ function handleFiles(files){
   document.getElementById('imgInput').value='';
 }
 function renderImgGrid(){
-  const g=document.getElementById('imgGrid');
-  g.innerHTML='';
+  const g=document.getElementById('imgGrid'); g.innerHTML='';
   modalImages.forEach((img,i)=>{
     const div=document.createElement('div'); div.className='img-thumb';
-    div.innerHTML=`<img src="${img.dataUrl}" alt="${img.name}">
-      <button class="img-del" onclick="removeImg(${i})" title="Fjern"><i class="ti ti-x"></i></button>`;
+    div.innerHTML=`<img src="${img.dataUrl}" alt="${img.name}"><button class="img-del" onclick="removeImg(${i})"><i class="ti ti-x"></i></button>`;
     div.querySelector('img').onclick=()=>openLightbox(img.dataUrl);
     g.appendChild(div);
   });
@@ -855,20 +839,14 @@ function renderImgGrid(){
 function removeImg(i){ modalImages.splice(i,1); renderImgGrid(); }
 function openLightbox(src){ document.getElementById('lbImg').src=src; document.getElementById('lightbox').classList.add('open'); }
 function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
-
-// Drag into editor area
 function wrapDragOver(e){ if(e.dataTransfer.types.includes('Files')){ e.preventDefault(); document.getElementById('editorWrap').style.outline='2px solid var(--accent)'; } }
 function wrapDragLeave(){ document.getElementById('editorWrap').style.outline=''; }
 function wrapDrop(e){ if(e.dataTransfer.files.length){ e.preventDefault(); wrapDragLeave(); handleFiles(e.dataTransfer.files); } }
-
-// Drop zone
 function dzDragOver(e){ e.preventDefault(); document.getElementById('dropZone').classList.add('dragover'); }
 function dzDragLeave(){ document.getElementById('dropZone').classList.remove('dragover'); }
 function dzDrop(e){ e.preventDefault(); dzDragLeave(); if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files); }
 
-// ───────────────────────────────────────────
-//  BRANDS
-// ───────────────────────────────────────────
+// ─── BRANDS ─────────────────────────────────────────────
 function brandsBgClick(e){ if(e.target===document.getElementById('brandsBg'))closeBrands(); }
 function openBrands(){ renderBrandList(); document.getElementById('brandsBg').classList.add('open'); }
 function closeBrands(){ document.getElementById('brandsBg').classList.remove('open'); render(); }
@@ -876,33 +854,34 @@ function renderBrandList(){
   document.getElementById('brandList').innerHTML=brands.map((b,i)=>`
     <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)">
       <div style="width:10px;height:10px;border-radius:50%;background:${b.bg};border:2px solid ${b.c};flex-shrink:0"></div>
-      <span style="flex:1;font-size:13px;font-weight:600;color:var(--txt)">${b.name}</span>
+      <span style="flex:1;font-size:13px;font-weight:600">${b.name}</span>
       ${brands.length>1?`<button onclick="removeBrand(${i})" style="background:none;border:none;color:var(--txt3);font-size:14px;padding:2px 4px;border-radius:5px" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='var(--txt3)'"><i class="ti ti-trash"></i></button>`:''}
     </div>`).join('');
 }
-function addBrand(){
+async function addBrand(){
   const n=document.getElementById('newBrandName').value.trim(); if(!n)return;
   const pals=[['#E1F5EE','#085041'],['#FBEAF0','#72243E'],['#E6F1FB','#0C447C'],['#EEEDFE','#3C3489'],['#FAEEDA','#633806'],['#FEF9C3','#854D0E']];
   const p=pals[brands.length%pals.length];
-  brands.push({id:'b'+Date.now(),name:n,bg:p[0],c:p[1]});
-  save(); document.getElementById('newBrandName').value=''; renderBrandList();
+  const brand={id:'b'+Date.now(), name:n, bg:p[0], c:p[1]};
+  brands.push(brand);
+  await dbUpsertBrand(brand);
+  document.getElementById('newBrandName').value=''; renderBrandList();
 }
-function removeBrand(i){ if(!confirm('Slet brand?'))return; brands.splice(i,1); save(); renderBrandList(); }
-
-function openDatePicker(e, el){
-  // Prevent double-firing and let the browser handle native calendar icon clicks
-  if(e.target !== el) return;
-  e.preventDefault();
-  el.focus();
-  try{ el.showPicker(); }catch(err){}
+async function removeBrand(i){
+  if(!confirm('Slet brand?'))return;
+  const b=brands[i];
+  brands.splice(i,1);
+  await dbDeleteBrand(b.id);
+  renderBrandList();
 }
 
-function triggerAI(){ window.open('https://claude.ai','_blank'); }
-
-// ───────────────────────────────────────────
-//  INIT
-// ───────────────────────────────────────────
-load(); render();
+// ─── INIT ────────────────────────────────────────────────
+async function init(){
+  await dbLoadAll();
+  document.getElementById('loadingScreen').classList.add('hidden');
+  render();
+}
+init();
 </script>
 </body>
 </html>
