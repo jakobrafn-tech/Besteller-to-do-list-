@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BESTSELLER Task Board</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root {
   --bg:       #f3f2ee;
@@ -136,7 +139,6 @@ button{cursor:pointer}
 /* Props grid */
 .props{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:24px}
 .prop{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .1s}
-.prop:nth-last-child(-n+2){border-bottom:none}
 .prop.l{border-right:1px solid var(--border)}
 .prop:hover{background:var(--surface2)}
 .p-icon{font-size:15px;color:var(--txt3);width:18px;flex-shrink:0}
@@ -209,7 +211,6 @@ button{cursor:pointer}
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="nav">
   <span class="nav-logo">Bestseller</span>
   <div class="nav-div"></div>
@@ -219,7 +220,6 @@ button{cursor:pointer}
 
 <div class="app">
 
-  <!-- TOOLBAR -->
   <div class="toolbar">
     <span class="tb-title"><i class="ti ti-list-details"></i>Task board</span>
     <div class="search-wrap">
@@ -250,10 +250,8 @@ button{cursor:pointer}
     <button class="btn-new" onclick="openNew()"><i class="ti ti-plus"></i>Ny opgave</button>
   </div>
 
-  <!-- STATS -->
   <div class="stats" id="stats"></div>
 
-  <!-- TABLE -->
   <div class="table-wrap">
     <div class="t-head">
       <div class="th"></div>
@@ -268,7 +266,6 @@ button{cursor:pointer}
   </div>
 </div>
 
-<!-- ─── TASK MODAL ─── -->
 <div class="overlay" id="taskOverlay" onmousedown="overlayBg(event)">
 <div class="modal" id="taskModal">
 
@@ -281,16 +278,14 @@ button{cursor:pointer}
 
   <div class="modal-body">
 
-    <!-- Title -->
     <input class="m-title" id="fTitle" type="text" placeholder="Skriv opgavetitel…" autocomplete="off">
 
-    <!-- Props grid -->
     <div class="props" id="propsGrid">
       <div class="prop l">
         <i class="ti ti-circle-half p-icon"></i>
         <span class="p-lbl">Status</span>
         <div class="p-val">
-          <select class="p-sel" id="fStatus" onchange="onStatusChange(this.value)">
+          <select class="p-sel" id="fStatus">
             <option value="todo">To Do</option>
             <option value="ready">Ready for Production</option>
             <option value="inprogress">In Progress</option>
@@ -306,20 +301,12 @@ button{cursor:pointer}
       <div class="prop l">
         <i class="ti ti-calendar p-icon"></i>
         <span class="p-lbl">Startdato</span>
-        <div class="p-val">
-          <input class="p-inp" id="fStart" type="date"
-            onpointerdown="openDatePicker(event,this)"
-            onkeydown="if(event.key==='Enter'||event.key===' ')openDatePicker(event,this)">
-        </div>
+        <div class="p-val"><input class="p-inp" id="fStart" type="date"></div>
       </div>
       <div class="prop">
         <i class="ti ti-calendar-due p-icon"></i>
         <span class="p-lbl">Deadline</span>
-        <div class="p-val">
-          <input class="p-inp" id="fDue" type="date"
-            onpointerdown="openDatePicker(event,this)"
-            onkeydown="if(event.key==='Enter'||event.key===' ')openDatePicker(event,this)">
-        </div>
+        <div class="p-val"><input class="p-inp" id="fDue" type="date"></div>
       </div>
       <div class="prop l">
         <i class="ti ti-flag p-icon"></i>
@@ -340,41 +327,19 @@ button{cursor:pointer}
       </div>
     </div>
 
-    <!-- Rich editor -->
     <div class="editor-section">
       <div class="editor-lbl">Beskrivelse</div>
-      <div class="editor-wrap" id="editorWrap"
-        ondragover="wrapDragOver(event)" ondragleave="wrapDragLeave()" ondrop="wrapDrop(event)">
+      <div class="editor-wrap" id="editorWrap">
         <div class="ed-toolbar">
-          <button class="etb" onclick="fmt('bold')" title="Fed"><b style="font-size:14px">B</b></button>
-          <button class="etb" onclick="fmt('italic')" title="Kursiv"><i style="font-size:14px">I</i></button>
-          <button class="etb" onclick="fmt('underline')" title="Understreg"><span style="text-decoration:underline">U</span></button>
-          <button class="etb" onclick="fmt('strikeThrough')" title="Gns."><span style="text-decoration:line-through">S</span></button>
+          <button class="etb" onclick="fmt('bold')"><b>B</b></button>
+          <button class="etb" onclick="fmt('italic')"><i>I</i></button>
+          <button class="etb" onclick="fmt('underline')"><u>U</u></button>
           <div class="etb-sep"></div>
-          <button class="etb" onclick="fmtBlock('h2')" title="H1" style="font-size:12px;font-weight:700">H1</button>
-          <button class="etb" onclick="fmtBlock('h3')" title="H2" style="font-size:11px;font-weight:700">H2</button>
-          <button class="etb" onclick="fmtBlock('p')" title="Normal">¶</button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="fmt('insertUnorderedList')" title="Liste"><i class="ti ti-list"></i></button>
-          <button class="etb" onclick="fmt('insertOrderedList')" title="Numm. liste"><i class="ti ti-list-numbers"></i></button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="doLink()" title="Link"><i class="ti ti-link"></i></button>
-          <button class="etb" onclick="triggerImgUpload()" title="Billede"><i class="ti ti-photo"></i></button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="clearDesc()" title="Ryd" style="color:#dc2626"><i class="ti ti-trash"></i></button>
+          <button class="etb" onclick="clearDesc()" style="color:#dc2626"><i class="ti ti-trash"></i></button>
         </div>
-        <div class="ed-area" id="edArea" contenteditable="true"
-          data-placeholder="Tilføj beskrivelse, noter eller links…" spellcheck="false"></div>
-        <div class="img-grid" id="imgGrid"></div>
-        <div class="drop-zone" id="dropZone" onclick="triggerImgUpload()"
-          ondragover="dzDragOver(event)" ondragleave="dzDragLeave()" ondrop="dzDrop(event)">
-          <i class="ti ti-cloud-upload"></i>
-          Drag & drop billeder her, eller klik for at uploade
-        </div>
+        <div class="ed-area" id="edArea" contenteditable="true" data-placeholder="Tilføj beskrivelse, noter eller links…" spellcheck="false"></div>
       </div>
     </div>
-
-    <input type="file" id="imgInput" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
   </div>
 
   <div class="modal-footer">
@@ -386,15 +351,6 @@ button{cursor:pointer}
 </div>
 </div>
 
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lbImg" src="" alt="Preview">
-</div>
-
-<!-- POPUP DROPDOWN -->
-<div class="popup" id="popup"></div>
-
-<!-- BRANDS MODAL -->
 <div class="brands-bg" id="brandsBg" onmousedown="brandsBgClick(event)">
 <div class="brands-modal">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -403,21 +359,20 @@ button{cursor:pointer}
   </div>
   <div id="brandList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"></div>
   <div style="display:flex;gap:8px">
-    <input id="newBrandName" placeholder="Nyt brand…" type="text"
-      style="flex:1;padding:8px 12px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt);outline:none"
-      onkeydown="if(event.key==='Enter')addBrand()">
+    <input id="newBrandName" placeholder="Nyt brand…" type="text" style="flex:1;padding:8px 12px;border-radius:var(--r);border:1px solid var(--border2);outline:none">
     <button class="btn-save" style="padding:8px 14px" onclick="addBrand()"><i class="ti ti-plus"></i></button>
-  </div>
-  <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-    <button class="btn-save" onclick="closeBrands()">Luk</button>
   </div>
 </div>
 </div>
 
 <script>
 // ───────────────────────────────────────────
-//  CONFIG
+//  SUPABASE INITIALISERING (Lige lukket ind med dine rigtige nøgler!)
 // ───────────────────────────────────────────
+const supabaseUrl = 'https://fmcloudylxigejbfqktl.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtY2x1YWR5bHhpZ2VqYmZxa3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMTQ3NDYsImV4cCI6MjA5NTU5MDc0Nn0.CetSfkZhVqYZVDzCu5U3dioBnl9qSZr7VBgn-kw3bzA';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
 const SECTIONS = [
   { id:'todo',       label:'To Do',                color:'#9b9a95' },
   { id:'ready',      label:'Ready for Production', color:'#e07d2a' },
@@ -428,7 +383,7 @@ const STATUS = {
   todo:       { label:'To Do',                bg:'#f4f3f0', c:'#6b6a65', dot:'#9b9a95' },
   ready:      { label:'Ready for Production', bg:'#FEF3EA', c:'#9a4e0a', dot:'#e07d2a' },
   inprogress: { label:'In Progress',           bg:'#EFF6FF', c:'#1d4ed8', dot:'#3b82f6' },
-  complete:   { label:'Complete',              bg:'#F0FDF4', c:'#15803d', dot:'#22c55e' }
+  complete:   { label:'Complete',               bg:'#F0FDF4', c:'#15803d', dot:'#22c55e' }
 };
 const PRI = {
   høj:    { bg:'#FEE2E2', c:'#dc2626', dot:'#ef4444' },
@@ -441,39 +396,49 @@ const DEF_BRANDS = [
   { id:'intern',     name:'Internt',     bg:'#F1EFE8', c:'#444441' }
 ];
 
-// ───────────────────────────────────────────
-//  STATE
-// ───────────────────────────────────────────
-let tasks=[], brands=[], editId=null, collapsed={}, activeFilter=null, modalImages=[];
+let tasks=[], brands=[], editId=null, collapsed={}, activeFilter=null;
 
-function load(){
-  try{ tasks=JSON.parse(localStorage.getItem('bsv6_tasks'))||seed(); }catch(e){tasks=seed();}
-  try{ brands=JSON.parse(localStorage.getItem('bsv6_brands'))||[...DEF_BRANDS]; }catch(e){brands=[...DEF_BRANDS];}
+// ── SYNC HENT FRA SUPABASE ──
+async function load(){
+  try{
+    const { data, error } = await supabase.from('todos').select('*').eq('id', 9999);
+    if(!error && data && data.length > 0) {
+      const cloudData = JSON.parse(data[0].text);
+      tasks = cloudData.tasks || seed();
+      brands = cloudData.brands || [...DEF_BRANDS];
+    } else {
+      tasks = JSON.parse(localStorage.getItem('bsv6_tasks')) || seed();
+      brands = JSON.parse(localStorage.getItem('bsv6_brands')) || [...DEF_BRANDS];
+    }
+  }catch(e){
+    tasks=seed(); brands=[...DEF_BRANDS];
+  }
+  render();
 }
-function save(){
-  try{localStorage.setItem('bsv6_tasks', JSON.stringify(tasks));}catch(e){}
-  try{localStorage.setItem('bsv6_brands',JSON.stringify(brands));}catch(e){}
+
+// ── SYNC GEM TIL SUPABASE ──
+async function save(){
+  try{
+    localStorage.setItem('bsv6_tasks', JSON.stringify(tasks));
+    localStorage.setItem('bsv6_brands', JSON.stringify(brands));
+  }catch(e){}
+
+  try {
+    const backupObj = { tasks, brands };
+    await supabase.from('todos').upsert([{ id: 9999, text: JSON.stringify(backupObj), completed: false }]);
+  } catch(e){ console.error("Cloud gemme fejl: ", e); }
 }
+
 function uid(){ return 't'+Date.now()+Math.random().toString(36).slice(2,5) }
 function mkSid(){ return Math.random().toString(36).slice(2,10).toUpperCase() }
 
 function seed(){
   return[
-    {id:'t1',sid:'86C9K9968',name:'LA: 4062 euro fra marketing i finansåret',brand:'lilatelier',status:'todo',start:'',due:'2026-04-30',priority:'',desc:'',tags:'',images:[],created:Date.now()-9e6},
-    {id:'t2',sid:mkSid(),name:'Pinterest: Credit Line (invoicing)',brand:'nameit',status:'todo',start:'',due:'',priority:'',desc:'',tags:'',images:[],created:Date.now()-8e6},
-    {id:'t3',sid:mkSid(),name:'Videoguides til Tenna',brand:'intern',status:'todo',start:'',due:'',priority:'medium',desc:'',tags:'',images:[],created:Date.now()-7e6},
-    {id:'t4',sid:mkSid(),name:'Summer campaign brief Q2',brand:'nameit',status:'ready',start:'2026-05-20',due:'2026-05-25',priority:'høj',desc:'',tags:'',images:[],created:Date.now()-6e6},
-    {id:'t5',sid:mkSid(),name:'TikTok creative refresh — Lil Atelier SS26',brand:'lilatelier',status:'inprogress',start:'2026-05-18',due:'2026-05-30',priority:'medium',desc:'',tags:'',images:[],created:Date.now()-5e6},
-    {id:'t6',sid:mkSid(),name:'Ekstra budget fra Oliver - meta [2500 EUR]',brand:'lilatelier',status:'complete',start:'2026-02-20',due:'',priority:'høj',desc:'',tags:'',images:[],created:Date.now()-4e6},
-    {id:'t7',sid:mkSid(),name:'Lead ad exclusing active wear and LMTD images',brand:'nameit',status:'complete',start:'2026-02-23',due:'2026-02-23',priority:'',desc:'',tags:'',images:[],created:Date.now()-3e6},
-    {id:'t8',sid:mkSid(),name:'New branding video to track',brand:'lilatelier',status:'complete',start:'2026-02-25',due:'',priority:'',desc:'',tags:'',images:[],created:Date.now()-2e6},
-    {id:'t9',sid:mkSid(),name:'New ads: cherry print',brand:'lilatelier',status:'complete',start:'2026-02-26',due:'',priority:'lav',desc:'',tags:'',images:[],created:Date.now()-1e6}
+    {id:'t1',sid:'86C9K9968',name:'LA: 4062 euro fra marketing i finansåret',brand:'lilatelier',status:'todo',start:'',due:'2026-04-30',priority:'',desc:'',tags:'',created:Date.now()},
+    {id:'t2',sid:mkSid(),name:'Pinterest: Credit Line (invoicing)',brand:'nameit',status:'todo',start:'',due:'',priority:'',desc:'',tags:'',created:Date.now()}
   ];
 }
 
-// ───────────────────────────────────────────
-//  DATE HELPERS
-// ───────────────────────────────────────────
 function today(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
 function dateSt(due,status){
   if(!due||status==='complete') return 'future';
@@ -484,34 +449,27 @@ function dateSt(due,status){
   if(diff<=3) return 'soon';
   return 'future';
 }
+// Rettet til fejlfri datovisning
 function fmtD(s){
-  if(!s)return '';
-  return new Date(s).toLocaleDateString('da-DK',{day:'numeric',month:'short'});
+  if(!s) return '';
+  const d = new Date(s);
+  if(isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('da-DK',{day:'numeric',month:'short'});
 }
 function smartScore(t){
-  // Tasks with a start date sort by start date first, then due date, then no-date last
-  if(t.start){
-    const d=new Date(t.start); d.setHours(0,0,0,0);
-    return d.getTime();
-  }
-  if(t.due){
-    const d=new Date(t.due); d.setHours(0,0,0,0);
-    // Put due-only tasks after all start-date tasks
-    return d.getTime() + 1e13;
-  }
+  if(t.start){ return new Date(t.start).getTime(); }
+  if(t.due){ return new Date(t.due).getTime() + 1e13; }
   return 9e15;
 }
 function getBrand(id){ return brands.find(b=>b.id===id)||{name:'Ukendt',bg:'#f1f0ec',c:'#5a5a55'} }
 
-// ───────────────────────────────────────────
-//  FILTER
-// ───────────────────────────────────────────
 function toggleFilter(f){
   activeFilter = activeFilter===f ? null : f;
   document.querySelectorAll('.df-btn').forEach(b=>b.classList.remove('active'));
   if(activeFilter) document.getElementById('df-'+activeFilter).classList.add('active');
   render();
 }
+
 function filtered(){
   const q=document.getElementById('srch').value.toLowerCase();
   const fb=document.getElementById('fBrand').value;
@@ -525,13 +483,11 @@ function filtered(){
     if(fp&&t.priority!==fp)return false;
     if(activeFilter==='today'){
       const ref=t.start||t.due; if(!ref)return false;
-      const d=new Date(ref); d.setHours(0,0,0,0);
-      return d.getTime()===t0.getTime();
+      return new Date(ref).toDateString() === t0.toDateString();
     }
     if(activeFilter==='week'){
       const ref=t.start||t.due; if(!ref)return false;
-      const d=new Date(ref); d.setHours(0,0,0,0);
-      return d>=t0&&d<=tEnd;
+      const d=new Date(ref); return d>=t0&&d<=tEnd;
     }
     if(activeFilter==='overdue') return dateSt(t.due,t.status)==='overdue';
     return true;
@@ -546,9 +502,6 @@ function filtered(){
   return res;
 }
 
-// ───────────────────────────────────────────
-//  RENDER
-// ───────────────────────────────────────────
 function renderStats(){
   const c={todo:0,ready:0,inprogress:0,complete:0}; let od=0;
   tasks.forEach(t=>{ if(c[t.status]!=null)c[t.status]++; if(dateSt(t.due,t.status)==='overdue')od++; });
@@ -559,12 +512,14 @@ function renderStats(){
     <div class="stat"><div class="stat-dot" style="background:#ef4444"></div><div><div class="stat-lbl">Forsinkede</div><div class="${od?'stat-red':'stat-n'}">${od}</div></div></div>
   `;
 }
+
 function updateBrandFilter(){
   const sel=document.getElementById('fBrand'), cur=sel.value;
   sel.innerHTML='<option value="">Alle brands</option>';
   brands.forEach(b=>{const o=new Option(b.name,b.id);if(b.id===cur)o.selected=true;sel.add(o);});
 }
 
+// ── RENDER GENOPBYGGET OG FÆRDIGGJORTE ──
 function render(){
   renderStats(); updateBrandFilter();
   const ft=filtered();
@@ -574,335 +529,140 @@ function render(){
   SECTIONS.forEach(sec=>{
     const rows=ft.filter(t=>t.status===sec.id);
     const sc=STATUS[sec.id];
-    const wrap=document.createElement('div');
-
-    // Section header
-    const hdr=document.createElement('div');
-    hdr.className='sec-hdr';
-    hdr.innerHTML=`
+    
+    const secHdr = document.createElement('div');
+    secHdr.className = 'sec-hdr';
+    secHdr.innerHTML = `
       <div class="sec-dot" style="background:${sec.color}"></div>
       <span class="sec-lbl">${sec.label}</span>
       <span class="sec-cnt">${rows.length}</span>
-      <i class="ti ${collapsed[sec.id]?'ti-chevron-right':'ti-chevron-down'} chev"></i>`;
-    hdr.onclick=()=>{ collapsed[sec.id]=!collapsed[sec.id]; render(); };
-    wrap.appendChild(hdr);
+      <i class="ti ti-chevron-${collapsed[sec.id]?'right':'down'} chev"></i>
+    `;
+    secHdr.onclick = () => { collapsed[sec.id]=!collapsed[sec.id]; render(); };
+    body.appendChild(secHdr);
 
-    if(!collapsed[sec.id]){
-      rows.forEach(t=>{
-        const br=getBrand(t.brand);
-        const pr=t.priority&&PRI[t.priority];
-        // date display
-        const dsSt=dateSt(t.start, t.status==='complete'?'complete':'active');
-        const dsDu=dateSt(t.due,   t.status);
-        const startTxt=t.start ? fmtD(t.start) : '';
-        const dueTxt  =t.due   ? fmtD(t.due)   : '';
-        const dueIcon = dsDu==='overdue'?'ti-alert-circle':dsDu==='today'?'ti-clock':'ti-calendar-due';
+    if(collapsed[sec.id]) return;
 
-        const row=document.createElement('div');
-        row.className='task-row';
-        row.innerHTML=`
-          <div class="td" style="justify-content:center">
-            <div class="status-dot" style="background:${sc.dot}" title="${sec.label}"></div>
-          </div>
-          <div class="td">
-            <span class="task-name" data-id="${t.id}">${t.name}</span>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="brand">
-              <span class="brand-pill" style="background:${br.bg};color:${br.c}">${br.name}</span>
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="status">
-              <span class="status-chip" style="background:${sc.bg};color:${sc.c}">${sc.label}</span>
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="start">
-              ${startTxt
-                ? `<i class="ti ti-calendar" style="font-size:12px;color:var(--txt3)"></i><span class="date-cell future">${startTxt}</span>`
-                : `<span class="date-cell empty">—</span>`}
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="due">
-              ${dueTxt
-                ? `<i class="ti ${dueIcon}" style="font-size:12px"></i><span class="date-cell ${dsDu}">${dsDu==='overdue'?'Forsinket':dsDu==='today'?'I dag':dueTxt}</span>`
-                : `<span class="date-cell empty">—</span>`}
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="priority">
-              ${pr
-                ? `<span class="pri-dot" style="background:${pr.dot}"></span><span style="font-size:12.5px;color:${pr.c}">${t.priority}</span>`
-                : `<span style="color:var(--txt3);font-size:12.5px">—</span>`}
-            </div>
-          </div>
-        `;
-        row.querySelector('.task-name').addEventListener('click', e=>{ e.stopPropagation(); openEdit(t.id); });
-        row.querySelectorAll('.ic').forEach(cell=>{
-          cell.addEventListener('click', e=>{ e.stopPropagation(); openInline(cell, t.id, cell.dataset.f); });
-        });
-        wrap.appendChild(row);
-      });
+    rows.forEach(t=>{
+      const br=getBrand(t.brand);
+      const pStr=t.priority?t.priority.charAt(0).toUpperCase()+t.priority.slice(1):'Ingen';
+      const pStyle=PRI[t.priority]?`background:${PRI[t.priority].bg};color:${PRI[t.priority].c}`:'color:var(--txt3)';
+      const dStat=dateSt(t.due,t.status);
 
-      const add=document.createElement('div');
-      add.className='add-row';
-      add.innerHTML='<i class="ti ti-plus" style="font-size:13px"></i>Tilføj opgave';
-      add.onclick=()=>openNew(sec.id);
-      wrap.appendChild(add);
-    }
-    body.appendChild(wrap);
+      const row=document.createElement('div');
+      row.className='task-row';
+      row.innerHTML=`
+        <div class="td"><div class="status-dot" style="background:${sc.dot}"></div></div>
+        <div class="td"><span class="task-name" onclick="openEdit('${t.id}')">${t.name}</span></div>
+        <div class="td"><span class="brand-pill" style="background:${br.bg};color:${br.c}">${br.name}</span></div>
+        <div class="td"><span class="status-chip" style="background:${sc.bg};color:${sc.c}">${sc.label}</span></div>
+        <div class="td date-cell future">${fmtD(t.start)}</div>
+        <div class="td date-cell ${dStat}">${fmtD(t.due)}</div>
+        <div class="td"><span class="status-chip" style="${pStyle}">${pStr}</span></div>
+      `;
+      body.appendChild(row);
+    });
+
+    const addBtn=document.createElement('div');
+    addBtn.className='add-row';
+    addBtn.innerHTML=`<i class="ti ti-plus"></i> Opret ny opgave i ${sec.label}...`;
+    addBtn.onclick=()=>openNew(sec.id);
+    body.appendChild(addBtn);
   });
 }
 
-// ───────────────────────────────────────────
-//  INLINE EDITING
-// ───────────────────────────────────────────
-let activePopup=null, inlineDateEl=null;
-
-function closePopup(){
-  const p=document.getElementById('popup');
-  p.classList.remove('open');
-  if(inlineDateEl){ inlineDateEl.remove(); inlineDateEl=null; }
-}
-document.addEventListener('click', closePopup);
-
-function openInline(cell, taskId, field){
-  closePopup();
-  const t=tasks.find(x=>x.id===taskId); if(!t)return;
-  const rect=cell.getBoundingClientRect();
-  const p=document.getElementById('popup');
-
-  if(field==='status'){
-    p.innerHTML='';
-    SECTIONS.forEach(sec=>{
-      const sc=STATUS[sec.id];
-      const item=document.createElement('div');
-      item.className='pop-item'+(t.status===sec.id?' active':'');
-      item.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${sc.dot};flex-shrink:0"></div>${sec.label}`;
-      item.onclick=e=>{ e.stopPropagation(); t.status=sec.id; save(); closePopup(); render(); };
-      p.appendChild(item);
-    });
-    posPopup(p, rect);
-  } else if(field==='brand'){
-    p.innerHTML='';
-    brands.forEach(b=>{
-      const item=document.createElement('div');
-      item.className='pop-item'+(t.brand===b.id?' active':'');
-      item.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${b.c};flex-shrink:0"></div>${b.name}`;
-      item.onclick=e=>{ e.stopPropagation(); t.brand=b.id; save(); closePopup(); render(); };
-      p.appendChild(item);
-    });
-    posPopup(p, rect);
-  } else if(field==='priority'){
-    p.innerHTML='';
-    const noneItem=document.createElement('div');
-    noneItem.className='pop-item'+(!t.priority?' active':'');
-    noneItem.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:var(--txt3);flex-shrink:0"></div>Ingen`;
-    noneItem.onclick=e=>{ e.stopPropagation(); t.priority=''; save(); closePopup(); render(); };
-    p.appendChild(noneItem);
-    Object.entries(PRI).forEach(([k,v])=>{
-      const item=document.createElement('div');
-      item.className='pop-item'+(t.priority===k?' active':'');
-      item.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${v.dot};flex-shrink:0"></div>${k}`;
-      item.onclick=e=>{ e.stopPropagation(); t.priority=k; save(); closePopup(); render(); };
-      p.appendChild(item);
-    });
-    posPopup(p, rect);
-  } else if(field==='start'||field==='due'){
-    const inp=document.createElement('input');
-    inp.type='date'; inp.value=t[field]||'';
-    inp.style.cssText=`position:fixed;z-index:600;padding:7px 10px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt);font-family:var(--font);box-shadow:0 6px 20px rgba(0,0,0,.13)`;
-    inp.style.left=Math.min(rect.left, window.innerWidth-160)+'px';
-    inp.style.top=(rect.bottom+4)+'px';
-    document.body.appendChild(inp);
-    inlineDateEl=inp;
-    setTimeout(()=>{ try{ inp.showPicker&&inp.showPicker(); }catch(e){} },40);
-    inp.addEventListener('change',e=>{ e.stopPropagation(); t[field]=inp.value; save(); closePopup(); render(); });
-    inp.addEventListener('click',e=>e.stopPropagation());
-  }
-}
-function posPopup(p, rect){
-  p.style.left=Math.min(rect.left, window.innerWidth-180)+'px';
-  p.style.top=(rect.bottom+4)+'px';
-  p.classList.add('open');
-  p.addEventListener('click',e=>e.stopPropagation(),{once:false});
+function updateModalBrands(){
+  const sel=document.getElementById('fBrandF'); sel.innerHTML='<option value="">Vælg brand...</option>';
+  brands.forEach(b=>sel.add(new Option(b.name,b.id)));
 }
 
-// ───────────────────────────────────────────
-//  MODAL
-// ───────────────────────────────────────────
-function overlayBg(e){ if(e.target===document.getElementById('taskOverlay'))closeModal(); }
-
-function openNew(secId){
-  editId=null; modalImages=[];
-  document.getElementById('mSid').textContent=mkSid();
+function openNew(defaultStatus='todo'){
+  editId=null;
+  document.getElementById('mSid').textContent='NY OPGAVE';
   document.getElementById('fTitle').value='';
-  document.getElementById('fStatus').value=secId||'todo';
-  onStatusChange(secId||'todo');
+  document.getElementById('fStatus').value=defaultStatus;
+  updateModalBrands();
+  document.getElementById('fBrandF').value='';
   document.getElementById('fStart').value='';
   document.getElementById('fDue').value='';
   document.getElementById('fPriF').value='';
   document.getElementById('fTags').value='';
   document.getElementById('edArea').innerHTML='';
-  document.getElementById('imgGrid').innerHTML='';
   document.getElementById('delBtn').style.display='none';
-  popBrandSel(document.getElementById('fBrandF'), brands[0]?.id||'');
   document.getElementById('taskOverlay').classList.add('open');
-  setTimeout(()=>document.getElementById('fTitle').focus(),80);
 }
 
 function openEdit(id){
   const t=tasks.find(x=>x.id===id); if(!t)return;
-  editId=id; modalImages=[...(t.images||[])];
-  document.getElementById('mSid').textContent=t.sid||id.slice(1,9).toUpperCase();
-  document.getElementById('fTitle').value=t.name;
-  document.getElementById('fStatus').value=t.status;
-  onStatusChange(t.status);
+  editId=id;
+  document.getElementById('mSid').textContent=t.sid||mkSid();
+  document.getElementById('fTitle').value=t.name||'';
+  document.getElementById('fStatus').value=t.status||'todo';
+  updateModalBrands();
+  document.getElementById('fBrandF').value=t.brand||'';
   document.getElementById('fStart').value=t.start||'';
   document.getElementById('fDue').value=t.due||'';
   document.getElementById('fPriF').value=t.priority||'';
   document.getElementById('fTags').value=t.tags||'';
-  document.getElementById('edArea').innerHTML=t.desc||'';
-  popBrandSel(document.getElementById('fBrandF'),t.brand);
+  document.getElementById('edArea').innerHTML=t.desc|| '';
   document.getElementById('delBtn').style.display='block';
-  renderImgGrid();
   document.getElementById('taskOverlay').classList.add('open');
-  setTimeout(()=>document.getElementById('fTitle').focus(),80);
 }
 
-function onStatusChange(val){
-  const v=val||document.getElementById('fStatus').value;
-  const sc=STATUS[v];
-  if(!sc)return;
-  const pg=document.getElementById('propsGrid');
-  pg.style.borderColor=sc.dot+'55';
-  pg.querySelectorAll('.prop').forEach(p=>{
-    p.style.borderBottomColor=sc.dot+'33';
-    p.style.borderRightColor=sc.dot+'33';
-  });
-}
+function closeModal(){ document.getElementById('taskOverlay').classList.remove('open'); }
 
-function popBrandSel(sel,selected){
-  sel.innerHTML='';
-  brands.forEach(b=>{ const o=new Option(b.name,b.id); if(b.id===selected)o.selected=true; sel.add(o); });
-}
-
-function saveTask(){
+async function saveTask(){
   const title=document.getElementById('fTitle').value.trim(); if(!title)return;
-  const obj={
-    name:title, brand:document.getElementById('fBrandF').value,
-    status:document.getElementById('fStatus').value,
-    start:document.getElementById('fStart').value,
-    due:document.getElementById('fDue').value,
-    priority:document.getElementById('fPriF').value,
-    tags:document.getElementById('fTags').value.trim(),
-    desc:document.getElementById('edArea').innerHTML,
-    images:[...modalImages]
-  };
-  if(editId){ const t=tasks.find(x=>x.id===editId); if(t)Object.assign(t,obj); }
-  else tasks.push({id:uid(),sid:mkSid(),created:Date.now(),...obj});
-  save(); closeModal(); render();
+  if(editId){
+    const t=tasks.find(x=>x.id===editId);
+    if(t){
+      t.name=title; t.status=document.getElementById('fStatus').value;
+      t.brand=document.getElementById('fBrandF').value; t.start=document.getElementById('fStart').value;
+      t.due=document.getElementById('fDue').value; t.priority=document.getElementById('fPriF').value;
+      t.tags=document.getElementById('fTags').value; t.desc=document.getElementById('edArea').innerHTML;
+    }
+  }else{
+    tasks.push({
+      id:uid(), sid:mkSid(), name:title, status:document.getElementById('fStatus').value,
+      brand:document.getElementById('fBrandF').value, start:document.getElementById('fStart').value,
+      due:document.getElementById('fDue').value, priority:document.getElementById('fPriF').value,
+      tags:document.getElementById('fTags').value, desc:document.getElementById('edArea').innerHTML, created:Date.now()
+    });
+  }
+  closeModal(); await save(); render();
 }
 
-function delTask(){
+async function delTask(){
   if(!editId)return;
-  if(!confirm('Vil du slette denne opgave?'))return;
-  tasks=tasks.filter(t=>t.id!==editId);
-  save(); closeModal(); render();
+  if(confirm('Vil du slette opgaven?')){ tasks=tasks.filter(x=>x.id!==editId); closeModal(); await save(); render(); }
 }
 
-function closeModal(){
-  document.getElementById('taskOverlay').classList.remove('open');
-}
-
-// ───────────────────────────────────────────
-//  EDITOR
-// ───────────────────────────────────────────
-function fmt(cmd){ document.getElementById('edArea').focus(); document.execCommand(cmd,false,null); }
-function fmtBlock(t){ document.getElementById('edArea').focus(); document.execCommand('formatBlock',false,t); }
-function clearDesc(){ if(confirm('Ryd al tekst i beskrivelsen?'))document.getElementById('edArea').innerHTML=''; }
-function doLink(){
-  const url=prompt('URL:'); if(!url)return;
-  document.getElementById('edArea').focus();
-  document.execCommand('createLink',false,url);
-}
-
-// ───────────────────────────────────────────
-//  IMAGES
-// ───────────────────────────────────────────
-function triggerImgUpload(){ document.getElementById('imgInput').click(); }
-function handleFiles(files){
-  Array.from(files).forEach(f=>{
-    const r=new FileReader();
-    r.onload=e=>{ modalImages.push({dataUrl:e.target.result,name:f.name}); renderImgGrid(); };
-    r.readAsDataURL(f);
+function openBrands(){
+  const list=document.getElementById('brandList'); list.innerHTML='';
+  brands.forEach(b=>{
+    const d=document.createElement('div'); d.style='display:flex;justify-content:space-between;align-items:center;padding:6px;background:var(--surface2);border-radius:6px;';
+    d.innerHTML=`<span style="font-size:13px;font-weight:600;padding:2px 8px;border-radius:12px;background:${b.bg};color:${b.c}">${b.name}</span>
+                 <button onclick="delBrand('${b.id}')" style="background:none;border:none;color:#dc2626;"><i class="ti ti-trash"></i></button>`;
+    list.appendChild(d);
   });
-  document.getElementById('imgInput').value='';
+  document.getElementById('brandsBg').classList.add('open');
 }
-function renderImgGrid(){
-  const g=document.getElementById('imgGrid');
-  g.innerHTML='';
-  modalImages.forEach((img,i)=>{
-    const div=document.createElement('div'); div.className='img-thumb';
-    div.innerHTML=`<img src="${img.dataUrl}" alt="${img.name}">
-      <button class="img-del" onclick="removeImg(${i})" title="Fjern"><i class="ti ti-x"></i></button>`;
-    div.querySelector('img').onclick=()=>openLightbox(img.dataUrl);
-    g.appendChild(div);
-  });
+function closeBrands(){ document.getElementById('brandsBg').classList.remove('open'); }
+async function addBrand(){
+  const name=document.getElementById('newBrandName').value.trim(); if(!name)return;
+  const id=name.toLowerCase().replace(/[^a-z0-9]/g,'');
+  brands.push({id, name, bg:'#F1EFE8', c:'#444441'});
+  document.getElementById('newBrandName').value=''; openBrands(); await save(); render();
 }
-function removeImg(i){ modalImages.splice(i,1); renderImgGrid(); }
-function openLightbox(src){ document.getElementById('lbImg').src=src; document.getElementById('lightbox').classList.add('open'); }
-function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
+async function delBrand(id){ brands=brands.filter(b=>b.id!==id); openBrands(); await save(); render(); }
 
-// Drag into editor area
-function wrapDragOver(e){ if(e.dataTransfer.types.includes('Files')){ e.preventDefault(); document.getElementById('editorWrap').style.outline='2px solid var(--accent)'; } }
-function wrapDragLeave(){ document.getElementById('editorWrap').style.outline=''; }
-function wrapDrop(e){ if(e.dataTransfer.files.length){ e.preventDefault(); wrapDragLeave(); handleFiles(e.dataTransfer.files); } }
+function fmt(c){ document.execCommand(c,false,null); }
+function clearDesc(){ document.getElementById('edArea').innerHTML=''; }
+function overlayBg(e){ if(e.target.id==='taskOverlay') closeModal(); }
+function brandsBgClick(e){ if(e.target.id==='brandsBg') closeBrands(); }
+function triggerAI(){ alert("AI-assistenten forbinder snart!"); }
 
-// Drop zone
-function dzDragOver(e){ e.preventDefault(); document.getElementById('dropZone').classList.add('dragover'); }
-function dzDragLeave(){ document.getElementById('dropZone').classList.remove('dragover'); }
-function dzDrop(e){ e.preventDefault(); dzDragLeave(); if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files); }
-
-// ───────────────────────────────────────────
-//  BRANDS
-// ───────────────────────────────────────────
-function brandsBgClick(e){ if(e.target===document.getElementById('brandsBg'))closeBrands(); }
-function openBrands(){ renderBrandList(); document.getElementById('brandsBg').classList.add('open'); }
-function closeBrands(){ document.getElementById('brandsBg').classList.remove('open'); render(); }
-function renderBrandList(){
-  document.getElementById('brandList').innerHTML=brands.map((b,i)=>`
-    <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)">
-      <div style="width:10px;height:10px;border-radius:50%;background:${b.bg};border:2px solid ${b.c};flex-shrink:0"></div>
-      <span style="flex:1;font-size:13px;font-weight:600;color:var(--txt)">${b.name}</span>
-      ${brands.length>1?`<button onclick="removeBrand(${i})" style="background:none;border:none;color:var(--txt3);font-size:14px;padding:2px 4px;border-radius:5px" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='var(--txt3)'"><i class="ti ti-trash"></i></button>`:''}
-    </div>`).join('');
-}
-function addBrand(){
-  const n=document.getElementById('newBrandName').value.trim(); if(!n)return;
-  const pals=[['#E1F5EE','#085041'],['#FBEAF0','#72243E'],['#E6F1FB','#0C447C'],['#EEEDFE','#3C3489'],['#FAEEDA','#633806'],['#FEF9C3','#854D0E']];
-  const p=pals[brands.length%pals.length];
-  brands.push({id:'b'+Date.now(),name:n,bg:p[0],c:p[1]});
-  save(); document.getElementById('newBrandName').value=''; renderBrandList();
-}
-function removeBrand(i){ if(!confirm('Slet brand?'))return; brands.splice(i,1); save(); renderBrandList(); }
-
-function openDatePicker(e, el){
-  // Prevent double-firing and let the browser handle native calendar icon clicks
-  if(e.target !== el) return;
-  e.preventDefault();
-  el.focus();
-  try{ el.showPicker(); }catch(err){}
-}
-
-function triggerAI(){ window.open('https://claude.ai','_blank'); }
-
-// ───────────────────────────────────────────
-//  INIT
-// ───────────────────────────────────────────
-load(); render();
+window.onload = load;
 </script>
 </body>
 </html>
