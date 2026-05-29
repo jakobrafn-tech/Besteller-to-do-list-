@@ -1,892 +1,206 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BESTSELLER Task Board</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-<style>
-:root {
-  --bg:       #f3f2ee;
-  --surface:  #ffffff;
-  --surface2: #f7f6f2;
-  --surface3: #edece7;
-  --border:   rgba(0,0,0,.08);
-  --border2:  rgba(0,0,0,.14);
-  --txt:      #1a1a18;
-  --txt2:     #6b6a65;
-  --txt3:     #a09e98;
-  --accent:   #0F6E56;
-  --accent-h: #085041;
-  --accent-lt:#E1F5EE;
-  --r:        8px;
-  --rlg:      12px;
-  --font:     'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
-  --mono:     'SF Mono','Fira Code',monospace;
-  --c-todo:   #9b9a95;
-  --c-ready:  #e07d2a;
-  --c-prog:   #3b82f6;
-  --c-done:   #22c55e;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{font-size:14px}
-body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh}
-input,select,button,textarea{font-family:var(--font)}
-button{cursor:pointer}
-
-/* ── NAV ── */
-.nav{position:sticky;top:0;z-index:90;height:50px;display:flex;align-items:center;gap:10px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border)}
-.nav-logo{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}
-.nav-div{width:1px;height:16px;background:var(--border2);margin:0 2px}
-.nav-space{font-size:13px;color:var(--txt2)}
-.nav-right{margin-left:auto}
-.avatar{width:28px;height:28px;border-radius:50%;background:#1D9E75;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
-
-/* ── BODY ── */
-.app{padding:22px 24px;max-width:1320px;margin:0 auto}
-
-/* ── TOOLBAR ── */
-.toolbar{display:flex;align-items:center;gap:7px;margin-bottom:14px;flex-wrap:wrap}
-.tb-title{font-size:15px;font-weight:700;color:var(--txt);margin-right:2px;display:flex;align-items:center;gap:6px}
-.search-wrap{position:relative;flex:1;min-width:130px;max-width:220px}
-.search-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--txt3);pointer-events:none}
-.search-wrap input{width:100%;padding:7px 8px 7px 30px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt);transition:border-color .15s}
-.search-wrap input:focus{outline:none;border-color:var(--accent)}
-.tb-sel{padding:7px 10px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt2);transition:border-color .15s}
-.tb-sel:focus{outline:none;border-color:var(--accent)}
-.date-filters{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
-.df-btn{padding:6px 11px;font-size:12px;font-weight:500;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--txt2);transition:all .15s;display:flex;align-items:center;gap:4px}
-.df-btn:hover{background:var(--surface3);border-color:var(--txt3)}
-.df-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn-out{padding:7px 12px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt2);display:flex;align-items:center;gap:5px;transition:all .15s}
-.btn-out:hover{background:var(--surface2);border-color:var(--txt3);color:var(--txt)}
-.btn-new{padding:7px 16px;font-size:13px;font-weight:700;border-radius:var(--r);border:none;background:var(--accent);color:#fff;display:flex;align-items:center;gap:5px;margin-left:auto;transition:background .15s}
-.btn-new:hover{background:var(--accent-h)}
-
-/* ── STATS ── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:13px 16px;display:flex;align-items:center;gap:11px}
-.stat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.stat-lbl{font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
-.stat-n{font-size:22px;font-weight:800;line-height:1}
-.stat-red{font-size:22px;font-weight:800;color:#dc2626;line-height:1}
-
-/* ── TABLE ── */
-.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden}
-.t-head{display:grid;grid-template-columns:20px minmax(0,2.8fr) 120px 170px 100px 110px 88px;background:var(--surface2);border-bottom:1px solid var(--border);padding:0 16px}
-.th{font-size:11px;font-weight:600;color:var(--txt3);padding:10px 8px;display:flex;align-items:center;gap:4px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
-
-/* ── SECTION ── */
-.sec-hdr{display:flex;align-items:center;gap:9px;padding:8px 16px;background:var(--surface2);border-bottom:1px solid var(--border);user-select:none;transition:background .1s}
-.sec-hdr:hover{background:var(--surface3);cursor:pointer}
-.sec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.sec-lbl{font-size:13px;font-weight:700;color:var(--txt);flex:1}
-.sec-cnt{font-size:11px;color:var(--txt3);background:var(--surface);border-radius:20px;padding:1px 8px;border:1px solid var(--border)}
-.chev{font-size:12px;color:var(--txt3);margin-left:auto}
-
-/* ── TASK ROW ── */
-.task-row{display:grid;grid-template-columns:20px minmax(0,2.8fr) 120px 170px 100px 110px 88px;padding:0 16px;border-bottom:1px solid var(--border);transition:background .1s}
-.task-row:hover{background:var(--surface2)}
-.td{padding:11px 8px;display:flex;align-items:center;gap:6px;overflow:hidden;font-size:13px}
-.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:transform .2s}
-.task-row:hover .status-dot{transform:scale(1.3)}
-.task-name{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-weight:500;transition:color .15s}
-.task-name:hover{color:var(--accent)}
-
-/* ── INLINE CELLS ── */
-.ic{cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px 7px;border-radius:6px;transition:background .12s;min-width:0;max-width:100%}
-.ic:hover{background:var(--surface3)}
-.brand-pill{font-size:11.5px;border-radius:20px;padding:3px 10px;font-weight:700;white-space:nowrap;flex-shrink:0}
-.status-chip{font-size:11.5px;border-radius:6px;padding:3px 9px;font-weight:700;white-space:nowrap}
-.pri-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.date-cell{font-size:12.5px;display:flex;align-items:center;gap:4px;white-space:nowrap}
-.date-cell.overdue{color:#dc2626;font-weight:600}
-.date-cell.today{color:#d97706;font-weight:600}
-.date-cell.soon{color:#2563eb}
-.date-cell.future{color:var(--txt2)}
-.date-cell.empty{color:var(--txt3)}
-
-.add-row{display:flex;align-items:center;gap:7px;padding:9px 22px;color:var(--txt3);font-size:12.5px;transition:color .1s,background .1s}
-.add-row:hover{color:var(--txt);background:var(--surface2);cursor:pointer}
-
-/* ── POPUP DROPDOWN ── */
-.popup{position:fixed;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rlg);box-shadow:0 8px 28px rgba(0,0,0,.13);z-index:500;min-width:170px;overflow:hidden;display:none;padding:4px}
-.popup.open{display:block}
-.pop-item{padding:8px 12px;font-size:13px;border-radius:var(--r);display:flex;align-items:center;gap:8px;color:var(--txt);transition:background .1s;white-space:nowrap}
-.pop-item:hover{background:var(--surface2);cursor:pointer}
-.pop-item.active{background:var(--accent-lt);color:var(--accent);font-weight:700}
-
-/* ── TASK MODAL ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:200;align-items:flex-start;justify-content:center;padding:28px 16px 40px;overflow-y:auto}
-.overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:var(--rlg);border:1px solid var(--border2);width:860px;max-width:100%;box-shadow:0 20px 70px rgba(0,0,0,.18);margin:auto;cursor:default}
-.modal-topbar{display:flex;align-items:center;gap:8px;padding:11px 18px;border-bottom:1px solid var(--border);background:var(--surface2);border-radius:var(--rlg) var(--rlg) 0 0}
-.type-badge{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);font-size:11px;color:var(--txt2);font-weight:500}
-.m-sid{font-size:11px;color:var(--txt3);font-family:var(--mono)}
-.ai-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;border:1px solid #AFA9EC;background:#EEEDFE;font-size:11px;color:#3C3489;font-weight:600;transition:background .15s}
-.ai-btn:hover{background:#CECBF6}
-.close-x{margin-left:auto;background:none;border:none;color:var(--txt2);font-size:18px;padding:4px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .1s}
-.close-x:hover{color:var(--txt);background:var(--surface3)}
-
-.modal-body{padding:26px 28px 20px}
-.m-title{width:100%;font-size:24px;font-weight:800;color:var(--txt);border:none;background:transparent;outline:none;margin-bottom:22px;padding-bottom:10px;border-bottom:2px solid transparent;transition:border-color .2s;line-height:1.3}
-.m-title:focus{border-bottom-color:var(--accent)}
-.m-title::placeholder{color:var(--txt3)}
-
-/* Props grid */
-.props{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:24px}
-.prop{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .1s}
-.prop:nth-last-child(-n+2){border-bottom:none}
-.prop.l{border-right:1px solid var(--border)}
-.prop:hover{background:var(--surface2)}
-.p-icon{font-size:15px;color:var(--txt3);width:18px;flex-shrink:0}
-.p-lbl{font-size:12px;color:var(--txt2);width:82px;flex-shrink:0;font-weight:600}
-.p-val{flex:1;min-width:0}
-.p-sel{width:100%;font-size:13px;color:var(--txt);border:none;background:transparent;outline:none;padding:0;cursor:pointer}
-.p-inp{width:100%;font-size:13px;color:var(--txt);border:none;background:transparent;outline:none;padding:0;cursor:pointer}
-.p-inp::placeholder{color:var(--txt3)}
-.status-accent{transition:background .3s;border-radius:var(--rlg) var(--rlg) 0 0}
-
-/* Editor */
-.editor-section{}
-.editor-lbl{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px}
-.editor-wrap{border:1px solid var(--border2);border-radius:var(--rlg);overflow:hidden}
-.ed-toolbar{display:flex;align-items:center;gap:1px;padding:6px 9px;background:var(--surface2);border-bottom:1px solid var(--border);flex-wrap:wrap}
-.etb{background:none;border:none;color:var(--txt2);width:29px;height:27px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .1s}
-.etb:hover{background:var(--surface);color:var(--txt)}
-.etb-sep{width:1px;height:14px;background:var(--border2);margin:0 3px;flex-shrink:0}
-.ed-area{min-height:130px;padding:14px 16px;font-size:14px;line-height:1.7;outline:none;cursor:text;color:var(--txt)}
-.ed-area:empty::before{content:attr(data-placeholder);color:var(--txt3);pointer-events:none;display:block}
-.ed-area h2{font-size:18px;font-weight:700;margin:8px 0 4px}
-.ed-area h3{font-size:15px;font-weight:600;margin:6px 0 3px}
-.ed-area ul,.ed-area ol{padding-left:22px}
-.ed-area a{color:var(--accent)}
-
-/* Images */
-.img-grid{padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid var(--border)}
-.img-grid:empty{display:none}
-.img-thumb{position:relative;width:86px;height:68px;border-radius:7px;overflow:hidden;border:1px solid var(--border2);cursor:pointer;flex-shrink:0}
-.img-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
-.img-thumb:hover img{transform:scale(1.04)}
-.img-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0;transition:opacity .15s}
-.img-thumb:hover .img-del{opacity:1}
-.drop-zone{margin:8px 14px 12px;border:1.5px dashed var(--border2);border-radius:8px;padding:12px 16px;text-align:center;cursor:pointer;transition:all .15s;color:var(--txt3);font-size:12.5px}
-.drop-zone i{font-size:20px;display:block;margin-bottom:4px}
-.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:var(--accent-lt);color:var(--accent)}
-
-/* Modal footer */
-.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:14px 24px;border-top:1px solid var(--border);background:var(--surface2);border-radius:0 0 var(--rlg) var(--rlg)}
-.btn-del{padding:8px 14px;font-size:13px;border-radius:var(--r);border:none;background:#FEE2E2;color:#dc2626;font-weight:600;margin-right:auto;display:none;transition:background .15s}
-.btn-del:hover{background:#FECACA}
-.btn-cancel{padding:8px 14px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:none;color:var(--txt2);transition:all .15s}
-.btn-cancel:hover{background:var(--surface3)}
-.btn-save{padding:8px 22px;font-size:13px;font-weight:700;border-radius:var(--r);border:none;background:var(--accent);color:#fff;transition:background .15s}
-.btn-save:hover{background:var(--accent-h)}
-
-/* Lightbox */
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:900;align-items:center;justify-content:center;cursor:zoom-out}
-.lightbox.open{display:flex}
-.lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-
-/* Brands modal */
-.brands-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:300;align-items:center;justify-content:center;padding:16px}
-.brands-bg.open{display:flex}
-.brands-modal{background:var(--surface);border-radius:var(--rlg);border:1px solid var(--border2);padding:24px;width:380px;max-width:100%;box-shadow:0 8px 40px rgba(0,0,0,.15)}
-
-/* Responsive */
-@media(max-width:780px){
-  .t-head,.task-row{grid-template-columns:16px minmax(0,1fr) 90px 80px}
-  .t-head .th:nth-child(n+5),.task-row .td:nth-child(n+5){display:none}
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .props{grid-template-columns:1fr}
-  .prop.l{border-right:none}
-  .prop:nth-last-child(-n+2){border-bottom:1px solid var(--border)}
-  .prop:last-child{border-bottom:none}
-  .modal{width:100%}
-  .overlay{padding:12px 8px}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Besteller To-Do List</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            max-width: 450px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .input-felt {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #3498db;
+        }
+        button {
+            padding: 12px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            padding: 14px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        li:active {
+            transform: scale(0.98);
+        }
+        .todo-tekst {
+            flex: 1;
+            font-size: 16px;
+        }
+        .completed .todo-tekst {
+            text-decoration: line-through;
+            color: #bbb;
+        }
+        .slet-knap {
+            background: none;
+            color: #e74c3c;
+            border: none;
+            padding: 5px 10px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .slet-knap:hover {
+            background-color: #fdedec;
+        }
+    </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="nav">
-  <span class="nav-logo">Bestseller</span>
-  <div class="nav-div"></div>
-  <span class="nav-space">Paid Social — Jakob Space</span>
-  <div class="nav-right"><div class="avatar">JR</div></div>
-</nav>
-
-<div class="app">
-
-  <!-- TOOLBAR -->
-  <div class="toolbar">
-    <span class="tb-title"><i class="ti ti-list-details"></i>Task board</span>
-    <div class="search-wrap">
-      <i class="ti ti-search"></i>
-      <input type="text" id="srch" placeholder="Søg opgaver…" oninput="render()">
-    </div>
-    <select class="tb-sel" id="fBrand" onchange="render()"><option value="">Alle brands</option></select>
-    <select class="tb-sel" id="fPri" onchange="render()">
-      <option value="">Alle prioriteter</option>
-      <option value="høj">Høj</option>
-      <option value="medium">Medium</option>
-      <option value="lav">Lav</option>
-    </select>
-    <select class="tb-sel" id="sortBy" onchange="render()">
-      <option value="smart">Smart sortering</option>
-      <option value="due">Nærmeste deadline</option>
-      <option value="start">Nærmeste startdato</option>
-      <option value="priority">Prioritet</option>
-      <option value="name">Navn A–Z</option>
-      <option value="created">Nyeste oprettet</option>
-    </select>
-    <div class="date-filters">
-      <button class="df-btn" id="df-today" onclick="toggleFilter('today')"><i class="ti ti-sun"></i>I dag</button>
-      <button class="df-btn" id="df-week"  onclick="toggleFilter('week')"><i class="ti ti-calendar-week"></i>Denne uge</button>
-      <button class="df-btn" id="df-overdue" onclick="toggleFilter('overdue')"><i class="ti ti-alert-circle"></i>Forsinkede</button>
-    </div>
-    <button class="btn-out" onclick="openBrands()"><i class="ti ti-tag"></i>Brands</button>
-    <button class="btn-new" onclick="openNew()"><i class="ti ti-plus"></i>Ny opgave</button>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats" id="stats"></div>
-
-  <!-- TABLE -->
-  <div class="table-wrap">
-    <div class="t-head">
-      <div class="th"></div>
-      <div class="th"><i class="ti ti-subtask"></i>Opgave</div>
-      <div class="th">Brand</div>
-      <div class="th">Status</div>
-      <div class="th"><i class="ti ti-calendar"></i>Start</div>
-      <div class="th"><i class="ti ti-calendar-due"></i>Deadline</div>
-      <div class="th">Prioritet</div>
-    </div>
-    <div id="listBody"></div>
-  </div>
-</div>
-
-<!-- ─── TASK MODAL ─── -->
-<div class="overlay" id="taskOverlay" onmousedown="overlayBg(event)">
-<div class="modal" id="taskModal">
-
-  <div class="modal-topbar">
-    <div class="type-badge"><i class="ti ti-circle-dot" style="color:#3b82f6;font-size:13px"></i>Task</div>
-    <span class="m-sid" id="mSid"></span>
-    <button class="ai-btn" onclick="triggerAI()"><i class="ti ti-sparkles" style="font-size:12px"></i>Ask AI</button>
-    <button class="close-x" onclick="closeModal()"><i class="ti ti-x"></i></button>
-  </div>
-
-  <div class="modal-body">
-
-    <!-- Title -->
-    <input class="m-title" id="fTitle" type="text" placeholder="Skriv opgavetitel…" autocomplete="off">
-
-    <!-- Props grid -->
-    <div class="props" id="propsGrid">
-      <div class="prop l">
-        <i class="ti ti-circle-half p-icon"></i>
-        <span class="p-lbl">Status</span>
-        <div class="p-val">
-          <select class="p-sel" id="fStatus" onchange="onStatusChange(this.value)">
-            <option value="todo">To Do</option>
-            <option value="ready">Ready for Production</option>
-            <option value="inprogress">In Progress</option>
-            <option value="complete">Complete</option>
-          </select>
-        </div>
-      </div>
-      <div class="prop">
-        <i class="ti ti-tag p-icon"></i>
-        <span class="p-lbl">Brand</span>
-        <div class="p-val"><select class="p-sel" id="fBrandF"></select></div>
-      </div>
-      <div class="prop l">
-        <i class="ti ti-calendar p-icon"></i>
-        <span class="p-lbl">Startdato</span>
-        <div class="p-val">
-          <input class="p-inp" id="fStart" type="date"
-            onclick="this.showPicker&&this.showPicker()"
-            onfocus="this.showPicker&&this.showPicker()">
-        </div>
-      </div>
-      <div class="prop">
-        <i class="ti ti-calendar-due p-icon"></i>
-        <span class="p-lbl">Deadline</span>
-        <div class="p-val">
-          <input class="p-inp" id="fDue" type="date"
-            onclick="this.showPicker&&this.showPicker()"
-            onfocus="this.showPicker&&this.showPicker()">
-        </div>
-      </div>
-      <div class="prop l">
-        <i class="ti ti-flag p-icon"></i>
-        <span class="p-lbl">Prioritet</span>
-        <div class="p-val">
-          <select class="p-sel" id="fPriF">
-            <option value="">Ingen</option>
-            <option value="høj">🔴 Høj</option>
-            <option value="medium">🟡 Medium</option>
-            <option value="lav">🟢 Lav</option>
-          </select>
-        </div>
-      </div>
-      <div class="prop">
-        <i class="ti ti-hash p-icon"></i>
-        <span class="p-lbl">Tags</span>
-        <div class="p-val"><input class="p-inp" id="fTags" type="text" placeholder="Tilføj tags…"></div>
-      </div>
+    <h1>Min To-Do Liste</h1>
+    
+    <div class="input-felt">
+        <input type="text" id="todoInput" placeholder="Hvad skal du nå i dag?">
+        <button onclick="tilfoejTodo()">Tilføj</button>
     </div>
 
-    <!-- Rich editor -->
-    <div class="editor-section">
-      <div class="editor-lbl">Beskrivelse</div>
-      <div class="editor-wrap" id="editorWrap"
-        ondragover="wrapDragOver(event)" ondragleave="wrapDragLeave()" ondrop="wrapDrop(event)">
-        <div class="ed-toolbar">
-          <button class="etb" onclick="fmt('bold')" title="Fed"><b style="font-size:14px">B</b></button>
-          <button class="etb" onclick="fmt('italic')" title="Kursiv"><i style="font-size:14px">I</i></button>
-          <button class="etb" onclick="fmt('underline')" title="Understreg"><span style="text-decoration:underline">U</span></button>
-          <button class="etb" onclick="fmt('strikeThrough')" title="Gns."><span style="text-decoration:line-through">S</span></button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="fmtBlock('h2')" title="H1" style="font-size:12px;font-weight:700">H1</button>
-          <button class="etb" onclick="fmtBlock('h3')" title="H2" style="font-size:11px;font-weight:700">H2</button>
-          <button class="etb" onclick="fmtBlock('p')" title="Normal">¶</button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="fmt('insertUnorderedList')" title="Liste"><i class="ti ti-list"></i></button>
-          <button class="etb" onclick="fmt('insertOrderedList')" title="Numm. liste"><i class="ti ti-list-numbers"></i></button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="doLink()" title="Link"><i class="ti ti-link"></i></button>
-          <button class="etb" onclick="triggerImgUpload()" title="Billede"><i class="ti ti-photo"></i></button>
-          <div class="etb-sep"></div>
-          <button class="etb" onclick="clearDesc()" title="Ryd" style="color:#dc2626"><i class="ti ti-trash"></i></button>
-        </div>
-        <div class="ed-area" id="edArea" contenteditable="true"
-          data-placeholder="Tilføj beskrivelse, noter eller links…" spellcheck="false"></div>
-        <div class="img-grid" id="imgGrid"></div>
-        <div class="drop-zone" id="dropZone" onclick="triggerImgUpload()"
-          ondragover="dzDragOver(event)" ondragleave="dzDragLeave()" ondrop="dzDrop(event)">
-          <i class="ti ti-cloud-upload"></i>
-          Drag & drop billeder her, eller klik for at uploade
-        </div>
-      </div>
-    </div>
+    <ul id="todoListe"></ul>
 
-    <input type="file" id="imgInput" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
-  </div>
+    <script>
+        // Dine personlige Supabase login-oplysninger sat direkte ind:
+        const supabaseUrl = 'https://fmcloudylxigejbfqktl.supabase.co'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtY2x1YWR5bHhpZ2VqYmZxa3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMTQ3NDYsImV4cCI6MjA5NTU5MDc0Nn0.CetSfkZhVqYZVDzCu5U3dioBnl9qSZr7VBgn-kw3bzA'; 
+        
+        // Forbind til Supabase
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  <div class="modal-footer">
-    <button class="btn-del" id="delBtn" onclick="delTask()"><i class="ti ti-trash" style="margin-right:4px"></i>Slet opgave</button>
-    <button class="btn-cancel" onclick="closeModal()">Annuller</button>
-    <button class="btn-save" onclick="saveTask()"><i class="ti ti-check" style="margin-right:4px"></i>Gem</button>
-  </div>
+        // Hent automatisk listen når siden åbnes
+        window.onload = hentTodos;
 
-</div>
-</div>
+        // 1. HENT OPAGVER
+        async function hentTodos() {
+            const { data, error } = await supabase
+                .from('todos')
+                .select('*')
+                .order('created_at', { ascending: true });
 
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lbImg" src="" alt="Preview">
-</div>
+            if (error) {
+                console.error('Fejl ved hentning:', error);
+                return;
+            }
 
-<!-- POPUP DROPDOWN -->
-<div class="popup" id="popup"></div>
+            const listeElement = document.getElementById('todoListe');
+            listeElement.innerHTML = ''; 
 
-<!-- BRANDS MODAL -->
-<div class="brands-bg" id="brandsBg" onmousedown="brandsBgClick(event)">
-<div class="brands-modal">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <span style="font-size:15px;font-weight:700">Brands</span>
-    <button class="close-x" onclick="closeBrands()"><i class="ti ti-x"></i></button>
-  </div>
-  <div id="brandList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"></div>
-  <div style="display:flex;gap:8px">
-    <input id="newBrandName" placeholder="Nyt brand…" type="text"
-      style="flex:1;padding:8px 12px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt);outline:none"
-      onkeydown="if(event.key==='Enter')addBrand()">
-    <button class="btn-save" style="padding:8px 14px" onclick="addBrand()"><i class="ti ti-plus"></i></button>
-  </div>
-  <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-    <button class="btn-save" onclick="closeBrands()">Luk</button>
-  </div>
-</div>
-</div>
+            data.forEach(todo => {
+                const li = document.createElement('li');
+                if (todo.completed) li.classList.add('completed');
 
-<script>
-// ───────────────────────────────────────────
-//  CONFIG
-// ───────────────────────────────────────────
-const SECTIONS = [
-  { id:'todo',       label:'To Do',                color:'#9b9a95' },
-  { id:'ready',      label:'Ready for Production', color:'#e07d2a' },
-  { id:'inprogress', label:'In Progress',           color:'#3b82f6' },
-  { id:'complete',   label:'Complete',              color:'#22c55e' }
-];
-const STATUS = {
-  todo:       { label:'To Do',                bg:'#f4f3f0', c:'#6b6a65', dot:'#9b9a95' },
-  ready:      { label:'Ready for Production', bg:'#FEF3EA', c:'#9a4e0a', dot:'#e07d2a' },
-  inprogress: { label:'In Progress',           bg:'#EFF6FF', c:'#1d4ed8', dot:'#3b82f6' },
-  complete:   { label:'Complete',              bg:'#F0FDF4', c:'#15803d', dot:'#22c55e' }
-};
-const PRI = {
-  høj:    { bg:'#FEE2E2', c:'#dc2626', dot:'#ef4444' },
-  medium: { bg:'#FEFCE8', c:'#ca8a04', dot:'#eab308' },
-  lav:    { bg:'#F0FDF4', c:'#16a34a', dot:'#22c55e' }
-};
-const DEF_BRANDS = [
-  { id:'nameit',     name:'Name It',     bg:'#E1F5EE', c:'#085041' },
-  { id:'lilatelier', name:'Lil Atelier', bg:'#FBEAF0', c:'#72243E' },
-  { id:'intern',     name:'Internt',     bg:'#F1EFE8', c:'#444441' }
-];
+                // Opret tekst-elementet (klik på dette for at strege ud)
+                const tekstSpan = document.createElement('span');
+                tekstSpan.classList.add('todo-tekst');
+                tekstSpan.textContent = todo.text;
+                tekstSpan.onclick = () => toggleTodo(todo.id, todo.completed);
 
-// ───────────────────────────────────────────
-//  STATE
-// ───────────────────────────────────────────
-let tasks=[], brands=[], editId=null, collapsed={}, activeFilter=null, modalImages=[];
+                // Opret slet-knap (X)
+                const sletKnap = document.createElement('button');
+                sletKnap.classList.add('slet-knap');
+                sletKnap.innerHTML = '&times;';
+                sletKnap.onclick = (e) => {
+                    e.stopPropagation(); // Stopper klikket fra også at trykke på selve opgaven
+                    sletTodo(todo.id);
+                };
 
-function load(){
-  try{ tasks=JSON.parse(localStorage.getItem('bsv6_tasks'))||seed(); }catch(e){tasks=seed();}
-  try{ brands=JSON.parse(localStorage.getItem('bsv6_brands'))||[...DEF_BRANDS]; }catch(e){brands=[...DEF_BRANDS];}
-}
-function save(){
-  try{localStorage.setItem('bsv6_tasks', JSON.stringify(tasks));}catch(e){}
-  try{localStorage.setItem('bsv6_brands',JSON.stringify(brands));}catch(e){}
-}
-function uid(){ return 't'+Date.now()+Math.random().toString(36).slice(2,5) }
-function mkSid(){ return Math.random().toString(36).slice(2,10).toUpperCase() }
+                li.appendChild(tekstSpan);
+                li.appendChild(sletKnap);
+                listeElement.appendChild(li);
+            });
+        }
 
-function seed(){
-  return[
-    {id:'t1',sid:'86C9K9968',name:'LA: 4062 euro fra marketing i finansåret',brand:'lilatelier',status:'todo',start:'',due:'2026-04-30',priority:'',desc:'',tags:'',images:[],created:Date.now()-9e6},
-    {id:'t2',sid:mkSid(),name:'Pinterest: Credit Line (invoicing)',brand:'nameit',status:'todo',start:'',due:'',priority:'',desc:'',tags:'',images:[],created:Date.now()-8e6},
-    {id:'t3',sid:mkSid(),name:'Videoguides til Tenna',brand:'intern',status:'todo',start:'',due:'',priority:'medium',desc:'',tags:'',images:[],created:Date.now()-7e6},
-    {id:'t4',sid:mkSid(),name:'Summer campaign brief Q2',brand:'nameit',status:'ready',start:'2026-05-20',due:'2026-05-25',priority:'høj',desc:'',tags:'',images:[],created:Date.now()-6e6},
-    {id:'t5',sid:mkSid(),name:'TikTok creative refresh — Lil Atelier SS26',brand:'lilatelier',status:'inprogress',start:'2026-05-18',due:'2026-05-30',priority:'medium',desc:'',tags:'',images:[],created:Date.now()-5e6},
-    {id:'t6',sid:mkSid(),name:'Ekstra budget fra Oliver - meta [2500 EUR]',brand:'lilatelier',status:'complete',start:'2026-02-20',due:'',priority:'høj',desc:'',tags:'',images:[],created:Date.now()-4e6},
-    {id:'t7',sid:mkSid(),name:'Lead ad exclusing active wear and LMTD images',brand:'nameit',status:'complete',start:'2026-02-23',due:'2026-02-23',priority:'',desc:'',tags:'',images:[],created:Date.now()-3e6},
-    {id:'t8',sid:mkSid(),name:'New branding video to track',brand:'lilatelier',status:'complete',start:'2026-02-25',due:'',priority:'',desc:'',tags:'',images:[],created:Date.now()-2e6},
-    {id:'t9',sid:mkSid(),name:'New ads: cherry print',brand:'lilatelier',status:'complete',start:'2026-02-26',due:'',priority:'lav',desc:'',tags:'',images:[],created:Date.now()-1e6}
-  ];
-}
+        // 2. TILFØJ OPGAVE
+        async function tilfoejTodo() {
+            const input = document.getElementById('todoInput');
+            const tekst = input.value.trim();
 
-// ───────────────────────────────────────────
-//  DATE HELPERS
-// ───────────────────────────────────────────
-function today(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
-function dateSt(due,status){
-  if(!due||status==='complete') return 'future';
-  const d=new Date(due); d.setHours(0,0,0,0);
-  const diff=Math.round((d-today())/(864e5));
-  if(diff<0)  return 'overdue';
-  if(diff===0)return 'today';
-  if(diff<=3) return 'soon';
-  return 'future';
-}
-function fmtD(s){
-  if(!s)return '';
-  return new Date(s).toLocaleDateString('da-DK',{day:'numeric',month:'short'});
-}
-function smartScore(t){
-  const ref=t.start||t.due;
-  if(!ref) return 9999999999999;
-  return new Date(ref).getTime();
-}
-function getBrand(id){ return brands.find(b=>b.id===id)||{name:'Ukendt',bg:'#f1f0ec',c:'#5a5a55'} }
+            if (tekst === '') return; 
 
-// ───────────────────────────────────────────
-//  FILTER
-// ───────────────────────────────────────────
-function toggleFilter(f){
-  activeFilter = activeFilter===f ? null : f;
-  document.querySelectorAll('.df-btn').forEach(b=>b.classList.remove('active'));
-  if(activeFilter) document.getElementById('df-'+activeFilter).classList.add('active');
-  render();
-}
-function filtered(){
-  const q=document.getElementById('srch').value.toLowerCase();
-  const fb=document.getElementById('fBrand').value;
-  const fp=document.getElementById('fPri').value;
-  const sb=document.getElementById('sortBy').value;
-  const t0=today(), tEnd=new Date(t0.getTime()+7*864e5);
+            const { error } = await supabase
+                .from('todos')
+                .insert([ { text: tekst } ]); 
 
-  let res=tasks.filter(t=>{
-    if(q&&!t.name.toLowerCase().includes(q))return false;
-    if(fb&&t.brand!==fb)return false;
-    if(fp&&t.priority!==fp)return false;
-    if(activeFilter==='today'){
-      const ref=t.start||t.due; if(!ref)return false;
-      const d=new Date(ref); d.setHours(0,0,0,0);
-      return d.getTime()===t0.getTime();
-    }
-    if(activeFilter==='week'){
-      const ref=t.start||t.due; if(!ref)return false;
-      const d=new Date(ref); d.setHours(0,0,0,0);
-      return d>=t0&&d<=tEnd;
-    }
-    if(activeFilter==='overdue') return dateSt(t.due,t.status)==='overdue';
-    return true;
-  });
+            if (error) {
+                alert('Kunne ikke gemme: ' + error.message);
+            } else {
+                input.value = ''; 
+                hentTodos(); // Opdater listen med det samme
+            }
+        }
 
-  if(sb==='smart')    res.sort((a,b)=>smartScore(a)-smartScore(b));
-  else if(sb==='due') res.sort((a,b)=>(a.due||'9999')>(b.due||'9999')?1:-1);
-  else if(sb==='start')res.sort((a,b)=>(a.start||'9999')>(b.start||'9999')?1:-1);
-  else if(sb==='priority'){const o={høj:0,medium:1,lav:2,'':3};res.sort((a,b)=>o[a.priority]-o[b.priority]);}
-  else if(sb==='name')res.sort((a,b)=>a.name.localeCompare(b.name));
-  else if(sb==='created')res.sort((a,b)=>(b.created||0)-(a.created||0));
-  return res;
-}
+        // 3. MARKER SOM UDFØRT / IKKE UDFØRT
+        async function toggleTodo(id, nuvaerendeStatus) {
+            const { error } = await supabase
+                .from('todos')
+                .update({ completed: !nuvaerendeStatus })
+                .eq('id', id);
 
-// ───────────────────────────────────────────
-//  RENDER
-// ───────────────────────────────────────────
-function renderStats(){
-  const c={todo:0,ready:0,inprogress:0,complete:0}; let od=0;
-  tasks.forEach(t=>{ if(c[t.status]!=null)c[t.status]++; if(dateSt(t.due,t.status)==='overdue')od++; });
-  document.getElementById('stats').innerHTML=`
-    <div class="stat"><div class="stat-dot" style="background:#9b9a95"></div><div><div class="stat-lbl">To Do</div><div class="stat-n">${c.todo}</div></div></div>
-    <div class="stat"><div class="stat-dot" style="background:#e07d2a"></div><div><div class="stat-lbl">Ready / In Progress</div><div class="stat-n">${c.ready+c.inprogress}</div></div></div>
-    <div class="stat"><div class="stat-dot" style="background:#22c55e"></div><div><div class="stat-lbl">Complete</div><div class="stat-n">${c.complete}</div></div></div>
-    <div class="stat"><div class="stat-dot" style="background:#ef4444"></div><div><div class="stat-lbl">Forsinkede</div><div class="${od?'stat-red':'stat-n'}">${od}</div></div></div>
-  `;
-}
-function updateBrandFilter(){
-  const sel=document.getElementById('fBrand'), cur=sel.value;
-  sel.innerHTML='<option value="">Alle brands</option>';
-  brands.forEach(b=>{const o=new Option(b.name,b.id);if(b.id===cur)o.selected=true;sel.add(o);});
-}
+            if (error) {
+                console.error('Kunne ikke opdatere:', error);
+            } else {
+                hentTodos(); 
+            }
+        }
 
-function render(){
-  renderStats(); updateBrandFilter();
-  const ft=filtered();
-  const body=document.getElementById('listBody');
-  body.innerHTML='';
+        // 4. SLET OPGAVE
+        async function sletTodo(id) {
+            const { error } = await supabase
+                .from('todos')
+                .delete()
+                .eq('id', id);
 
-  SECTIONS.forEach(sec=>{
-    const rows=ft.filter(t=>t.status===sec.id);
-    const sc=STATUS[sec.id];
-    const wrap=document.createElement('div');
-
-    // Section header
-    const hdr=document.createElement('div');
-    hdr.className='sec-hdr';
-    hdr.innerHTML=`
-      <div class="sec-dot" style="background:${sec.color}"></div>
-      <span class="sec-lbl">${sec.label}</span>
-      <span class="sec-cnt">${rows.length}</span>
-      <i class="ti ${collapsed[sec.id]?'ti-chevron-right':'ti-chevron-down'} chev"></i>`;
-    hdr.onclick=()=>{ collapsed[sec.id]=!collapsed[sec.id]; render(); };
-    wrap.appendChild(hdr);
-
-    if(!collapsed[sec.id]){
-      rows.forEach(t=>{
-        const br=getBrand(t.brand);
-        const pr=t.priority&&PRI[t.priority];
-        // date display
-        const dsSt=dateSt(t.start, t.status==='complete'?'complete':'active');
-        const dsDu=dateSt(t.due,   t.status);
-        const startTxt=t.start ? fmtD(t.start) : '';
-        const dueTxt  =t.due   ? fmtD(t.due)   : '';
-        const dueIcon = dsDu==='overdue'?'ti-alert-circle':dsDu==='today'?'ti-clock':'ti-calendar-due';
-
-        const row=document.createElement('div');
-        row.className='task-row';
-        row.innerHTML=`
-          <div class="td" style="justify-content:center">
-            <div class="status-dot" style="background:${sc.dot}" title="${sec.label}"></div>
-          </div>
-          <div class="td">
-            <span class="task-name" data-id="${t.id}">${t.name}</span>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="brand">
-              <span class="brand-pill" style="background:${br.bg};color:${br.c}">${br.name}</span>
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="status">
-              <span class="status-chip" style="background:${sc.bg};color:${sc.c}">${sc.label}</span>
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="start">
-              ${startTxt
-                ? `<i class="ti ti-calendar" style="font-size:12px;color:var(--txt3)"></i><span class="date-cell future">${startTxt}</span>`
-                : `<span class="date-cell empty">—</span>`}
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="due">
-              ${dueTxt
-                ? `<i class="ti ${dueIcon}" style="font-size:12px"></i><span class="date-cell ${dsDu}">${dsDu==='overdue'?'Forsinket':dsDu==='today'?'I dag':dueTxt}</span>`
-                : `<span class="date-cell empty">—</span>`}
-            </div>
-          </div>
-          <div class="td">
-            <div class="ic" data-id="${t.id}" data-f="priority">
-              ${pr
-                ? `<span class="pri-dot" style="background:${pr.dot}"></span><span style="font-size:12.5px;color:${pr.c}">${t.priority}</span>`
-                : `<span style="color:var(--txt3);font-size:12.5px">—</span>`}
-            </div>
-          </div>
-        `;
-        row.querySelector('.task-name').addEventListener('click', e=>{ e.stopPropagation(); openEdit(t.id); });
-        row.querySelectorAll('.ic').forEach(cell=>{
-          cell.addEventListener('click', e=>{ e.stopPropagation(); openInline(cell, t.id, cell.dataset.f); });
-        });
-        wrap.appendChild(row);
-      });
-
-      const add=document.createElement('div');
-      add.className='add-row';
-      add.innerHTML='<i class="ti ti-plus" style="font-size:13px"></i>Tilføj opgave';
-      add.onclick=()=>openNew(sec.id);
-      wrap.appendChild(add);
-    }
-    body.appendChild(wrap);
-  });
-}
-
-// ───────────────────────────────────────────
-//  INLINE EDITING
-// ───────────────────────────────────────────
-let activePopup=null, inlineDateEl=null;
-
-function closePopup(){
-  const p=document.getElementById('popup');
-  p.classList.remove('open');
-  if(inlineDateEl){ inlineDateEl.remove(); inlineDateEl=null; }
-}
-document.addEventListener('click', closePopup);
-
-function openInline(cell, taskId, field){
-  closePopup();
-  const t=tasks.find(x=>x.id===taskId); if(!t)return;
-  const rect=cell.getBoundingClientRect();
-  const p=document.getElementById('popup');
-
-  if(field==='status'){
-    p.innerHTML='';
-    SECTIONS.forEach(sec=>{
-      const sc=STATUS[sec.id];
-      const item=document.createElement('div');
-      item.className='pop-item'+(t.status===sec.id?' active':'');
-      item.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${sc.dot};flex-shrink:0"></div>${sec.label}`;
-      item.onclick=e=>{ e.stopPropagation(); t.status=sec.id; save(); closePopup(); render(); };
-      p.appendChild(item);
-    });
-    posPopup(p, rect);
-  } else if(field==='brand'){
-    p.innerHTML='';
-    brands.forEach(b=>{
-      const item=document.createElement('div');
-      item.className='pop-item'+(t.brand===b.id?' active':'');
-      item.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${b.c};flex-shrink:0"></div>${b.name}`;
-      item.onclick=e=>{ e.stopPropagation(); t.brand=b.id; save(); closePopup(); render(); };
-      p.appendChild(item);
-    });
-    posPopup(p, rect);
-  } else if(field==='priority'){
-    p.innerHTML='';
-    const noneItem=document.createElement('div');
-    noneItem.className='pop-item'+(!t.priority?' active':'');
-    noneItem.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:var(--txt3);flex-shrink:0"></div>Ingen`;
-    noneItem.onclick=e=>{ e.stopPropagation(); t.priority=''; save(); closePopup(); render(); };
-    p.appendChild(noneItem);
-    Object.entries(PRI).forEach(([k,v])=>{
-      const item=document.createElement('div');
-      item.className='pop-item'+(t.priority===k?' active':'');
-      item.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${v.dot};flex-shrink:0"></div>${k}`;
-      item.onclick=e=>{ e.stopPropagation(); t.priority=k; save(); closePopup(); render(); };
-      p.appendChild(item);
-    });
-    posPopup(p, rect);
-  } else if(field==='start'||field==='due'){
-    const inp=document.createElement('input');
-    inp.type='date'; inp.value=t[field]||'';
-    inp.style.cssText=`position:fixed;z-index:600;padding:7px 10px;font-size:13px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--txt);font-family:var(--font);box-shadow:0 6px 20px rgba(0,0,0,.13)`;
-    inp.style.left=Math.min(rect.left, window.innerWidth-160)+'px';
-    inp.style.top=(rect.bottom+4)+'px';
-    document.body.appendChild(inp);
-    inlineDateEl=inp;
-    setTimeout(()=>{ try{ inp.showPicker&&inp.showPicker(); }catch(e){} },40);
-    inp.addEventListener('change',e=>{ e.stopPropagation(); t[field]=inp.value; save(); closePopup(); render(); });
-    inp.addEventListener('click',e=>e.stopPropagation());
-  }
-}
-function posPopup(p, rect){
-  p.style.left=Math.min(rect.left, window.innerWidth-180)+'px';
-  p.style.top=(rect.bottom+4)+'px';
-  p.classList.add('open');
-  p.addEventListener('click',e=>e.stopPropagation(),{once:false});
-}
-
-// ───────────────────────────────────────────
-//  MODAL
-// ───────────────────────────────────────────
-function overlayBg(e){ if(e.target===document.getElementById('taskOverlay'))closeModal(); }
-
-function openNew(secId){
-  editId=null; modalImages=[];
-  document.getElementById('mSid').textContent=mkSid();
-  document.getElementById('fTitle').value='';
-  document.getElementById('fStatus').value=secId||'todo';
-  onStatusChange(secId||'todo');
-  document.getElementById('fStart').value='';
-  document.getElementById('fDue').value='';
-  document.getElementById('fPriF').value='';
-  document.getElementById('fTags').value='';
-  document.getElementById('edArea').innerHTML='';
-  document.getElementById('imgGrid').innerHTML='';
-  document.getElementById('delBtn').style.display='none';
-  popBrandSel(document.getElementById('fBrandF'), brands[0]?.id||'');
-  document.getElementById('taskOverlay').classList.add('open');
-  setTimeout(()=>document.getElementById('fTitle').focus(),80);
-}
-
-function openEdit(id){
-  const t=tasks.find(x=>x.id===id); if(!t)return;
-  editId=id; modalImages=[...(t.images||[])];
-  document.getElementById('mSid').textContent=t.sid||id.slice(1,9).toUpperCase();
-  document.getElementById('fTitle').value=t.name;
-  document.getElementById('fStatus').value=t.status;
-  onStatusChange(t.status);
-  document.getElementById('fStart').value=t.start||'';
-  document.getElementById('fDue').value=t.due||'';
-  document.getElementById('fPriF').value=t.priority||'';
-  document.getElementById('fTags').value=t.tags||'';
-  document.getElementById('edArea').innerHTML=t.desc||'';
-  popBrandSel(document.getElementById('fBrandF'),t.brand);
-  document.getElementById('delBtn').style.display='block';
-  renderImgGrid();
-  document.getElementById('taskOverlay').classList.add('open');
-  setTimeout(()=>document.getElementById('fTitle').focus(),80);
-}
-
-function onStatusChange(val){
-  const v=val||document.getElementById('fStatus').value;
-  const sc=STATUS[v];
-  if(!sc)return;
-  const pg=document.getElementById('propsGrid');
-  pg.style.borderColor=sc.dot+'55';
-  pg.querySelectorAll('.prop').forEach(p=>{
-    p.style.borderBottomColor=sc.dot+'33';
-    p.style.borderRightColor=sc.dot+'33';
-  });
-}
-
-function popBrandSel(sel,selected){
-  sel.innerHTML='';
-  brands.forEach(b=>{ const o=new Option(b.name,b.id); if(b.id===selected)o.selected=true; sel.add(o); });
-}
-
-function saveTask(){
-  const title=document.getElementById('fTitle').value.trim(); if(!title)return;
-  const obj={
-    name:title, brand:document.getElementById('fBrandF').value,
-    status:document.getElementById('fStatus').value,
-    start:document.getElementById('fStart').value,
-    due:document.getElementById('fDue').value,
-    priority:document.getElementById('fPriF').value,
-    tags:document.getElementById('fTags').value.trim(),
-    desc:document.getElementById('edArea').innerHTML,
-    images:[...modalImages]
-  };
-  if(editId){ const t=tasks.find(x=>x.id===editId); if(t)Object.assign(t,obj); }
-  else tasks.push({id:uid(),sid:mkSid(),created:Date.now(),...obj});
-  save(); closeModal(); render();
-}
-
-function delTask(){
-  if(!editId)return;
-  if(!confirm('Vil du slette denne opgave?'))return;
-  tasks=tasks.filter(t=>t.id!==editId);
-  save(); closeModal(); render();
-}
-
-function closeModal(){
-  document.getElementById('taskOverlay').classList.remove('open');
-}
-
-// ───────────────────────────────────────────
-//  EDITOR
-// ───────────────────────────────────────────
-function fmt(cmd){ document.getElementById('edArea').focus(); document.execCommand(cmd,false,null); }
-function fmtBlock(t){ document.getElementById('edArea').focus(); document.execCommand('formatBlock',false,t); }
-function clearDesc(){ if(confirm('Ryd al tekst i beskrivelsen?'))document.getElementById('edArea').innerHTML=''; }
-function doLink(){
-  const url=prompt('URL:'); if(!url)return;
-  document.getElementById('edArea').focus();
-  document.execCommand('createLink',false,url);
-}
-
-// ───────────────────────────────────────────
-//  IMAGES
-// ───────────────────────────────────────────
-function triggerImgUpload(){ document.getElementById('imgInput').click(); }
-function handleFiles(files){
-  Array.from(files).forEach(f=>{
-    const r=new FileReader();
-    r.onload=e=>{ modalImages.push({dataUrl:e.target.result,name:f.name}); renderImgGrid(); };
-    r.readAsDataURL(f);
-  });
-  document.getElementById('imgInput').value='';
-}
-function renderImgGrid(){
-  const g=document.getElementById('imgGrid');
-  g.innerHTML='';
-  modalImages.forEach((img,i)=>{
-    const div=document.createElement('div'); div.className='img-thumb';
-    div.innerHTML=`<img src="${img.dataUrl}" alt="${img.name}">
-      <button class="img-del" onclick="removeImg(${i})" title="Fjern"><i class="ti ti-x"></i></button>`;
-    div.querySelector('img').onclick=()=>openLightbox(img.dataUrl);
-    g.appendChild(div);
-  });
-}
-function removeImg(i){ modalImages.splice(i,1); renderImgGrid(); }
-function openLightbox(src){ document.getElementById('lbImg').src=src; document.getElementById('lightbox').classList.add('open'); }
-function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
-
-// Drag into editor area
-function wrapDragOver(e){ if(e.dataTransfer.types.includes('Files')){ e.preventDefault(); document.getElementById('editorWrap').style.outline='2px solid var(--accent)'; } }
-function wrapDragLeave(){ document.getElementById('editorWrap').style.outline=''; }
-function wrapDrop(e){ if(e.dataTransfer.files.length){ e.preventDefault(); wrapDragLeave(); handleFiles(e.dataTransfer.files); } }
-
-// Drop zone
-function dzDragOver(e){ e.preventDefault(); document.getElementById('dropZone').classList.add('dragover'); }
-function dzDragLeave(){ document.getElementById('dropZone').classList.remove('dragover'); }
-function dzDrop(e){ e.preventDefault(); dzDragLeave(); if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files); }
-
-// ───────────────────────────────────────────
-//  BRANDS
-// ───────────────────────────────────────────
-function brandsBgClick(e){ if(e.target===document.getElementById('brandsBg'))closeBrands(); }
-function openBrands(){ renderBrandList(); document.getElementById('brandsBg').classList.add('open'); }
-function closeBrands(){ document.getElementById('brandsBg').classList.remove('open'); render(); }
-function renderBrandList(){
-  document.getElementById('brandList').innerHTML=brands.map((b,i)=>`
-    <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)">
-      <div style="width:10px;height:10px;border-radius:50%;background:${b.bg};border:2px solid ${b.c};flex-shrink:0"></div>
-      <span style="flex:1;font-size:13px;font-weight:600;color:var(--txt)">${b.name}</span>
-      ${brands.length>1?`<button onclick="removeBrand(${i})" style="background:none;border:none;color:var(--txt3);font-size:14px;padding:2px 4px;border-radius:5px" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='var(--txt3)'"><i class="ti ti-trash"></i></button>`:''}
-    </div>`).join('');
-}
-function addBrand(){
-  const n=document.getElementById('newBrandName').value.trim(); if(!n)return;
-  const pals=[['#E1F5EE','#085041'],['#FBEAF0','#72243E'],['#E6F1FB','#0C447C'],['#EEEDFE','#3C3489'],['#FAEEDA','#633806'],['#FEF9C3','#854D0E']];
-  const p=pals[brands.length%pals.length];
-  brands.push({id:'b'+Date.now(),name:n,bg:p[0],c:p[1]});
-  save(); document.getElementById('newBrandName').value=''; renderBrandList();
-}
-function removeBrand(i){ if(!confirm('Slet brand?'))return; brands.splice(i,1); save(); renderBrandList(); }
-
-function triggerAI(){ window.open('https://claude.ai','_blank'); }
-
-// ───────────────────────────────────────────
-//  INIT
-// ───────────────────────────────────────────
-load(); render();
-</script>
+            if (error) {
+                console.error('Kunne ikke slette:', error);
+            } else {
+                hentTodos(); 
+            }
+        }
+    </script>
 </body>
 </html>
